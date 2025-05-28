@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'routes.dart'; // Import the routes file
+import 'routes.dart';
+import 'config/supabase_config.dart';
+import 'presentation/blocs/auth_bloc.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeSupabase();
   runApp(const NetPulseApp());
 }
 
@@ -11,13 +16,12 @@ class NetPulseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'NetPulse',
-      initialRoute: AppRoutes.splash,
-      getPages: AppRoutes.pages,
-      home: const Scaffold(
-        body: Center(child: Text('NetPulse Skeleton')),
+    return BlocProvider(
+      create: (context) => AuthBloc(),
+      child: GetMaterialApp(
+        title: 'NetPulse',
+        initialRoute: AppRoutes.login, // Start at LoginScreen
+        getPages: AppRoutes.pages,
       ),
     );
   }
