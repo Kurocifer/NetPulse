@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'screens/splash_screen.dart';
+import 'screens/create_account_screen.dart';
+import 'screens/confirmation_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/home_screen.dart'; // Import the new screen
 
 class AppRoutes {
   static const String splash = '/splash';
@@ -11,33 +16,23 @@ class AppRoutes {
   static List<GetPage> get pages => [
         GetPage(
           name: splash,
-          page: () => const Scaffold(
-            body: Center(child: Text('Splash Screen Placeholder')),
-          ),
+          page: () => const SplashScreen(),
         ),
         GetPage(
           name: createAccount,
-          page: () => const Scaffold(
-            body: Center(child: Text('Create Account Placeholder')),
-          ),
+          page: () => const CreateAccountScreen(),
         ),
         GetPage(
           name: confirmation,
-          page: () => const Scaffold(
-            body: Center(child: Text('Confirmation Placeholder')),
-          ),
+          page: () => const ConfirmationScreen(),
         ),
         GetPage(
           name: login,
-          page: () => const Scaffold(
-            body: Center(child: Text('Login Placeholder')),
-          ),
+          page: () => const LoginScreen(),
         ),
         GetPage(
           name: home,
-          page: () => const Scaffold(
-            body: Center(child: Text('Home Placeholder')),
-          ),
+          page: () => const HomeScreen(),
         ),
       ];
 }
