@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class MetricsScreen extends StatelessWidget {
+  const MetricsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,12 +12,12 @@ class HomeScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Welcome to NetPulse',
+            'Network Metrics',
             style: GoogleFonts.poppins(fontSize: 24, color: Colors.black87),
           ),
           const SizedBox(height: 20),
           Text(
-            'Your network overview will be displayed here.',
+            'Detailed metrics like speed, latency, and data usage will be shown here.',
             style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[600]),
           ),
         ],
