@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'routes.dart'; // Import the routes file
 
 void main() {
-  runApp(const MyApp());
+  runApp(const NetPulseApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class NetPulseApp extends StatelessWidget {
+  const NetPulseApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'NetPulse',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      initialRoute: AppRoutes.splash,
+      getPages: AppRoutes.pages,
+      home: const Scaffold(
+        body: Center(child: Text('NetPulse Skeleton')),
       ),
-      home: const Scaffold(body: Center(child: Text('NetPulse Skeleton'))),
     );
   }
 }
