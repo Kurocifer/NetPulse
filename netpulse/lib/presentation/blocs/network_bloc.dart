@@ -1,34 +1,40 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
+import '../../data/services/network_service.dart';
 
-abstract class NetworkEvent extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
+abstract class NetworkEvent {}
 
-class FetchMetrics extends NetworkEvent {}
+class NetworkStatusRequested extends NetworkEvent {}
 
-abstract class NetworkState extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
+class NetworkState {
+  final String networkType;
+  final String isp;
 
-class NetworkInitial extends NetworkState {}
-class NetworkLoading extends NetworkState {}
-class NetworkLoaded extends NetworkState {}
-class NetworkError extends NetworkState {
-  final String error;
-  NetworkError(this.error);
-  @override
-  List<Object?> get props => [error];
+  NetworkState({required this.networkType, required this.isp});
 }
 
 class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
-  NetworkBloc() : super(NetworkInitial()) {
-    on<FetchMetrics>(_onFetchMetrics);
-  }
+  final NetworkService _networkService;
 
-  void _onFetchMetrics(FetchMetrics event, Emitter<NetworkState> emit) {
-    // Placeholder
+  NetworkBloc(this._networkService)
+      : super(NetworkState(
+          networkType: _networkService.getCurrentNetworkInfoSync()['networkType'] ?? 'Offline',
+          isp: _networkService.getCurrentNetworkInfoSync()['isp'] ?? 'Offline',
+        )) {
+    on<NetworkStatusRequested>((event, emit) async {
+      final info = await _networkService.getNetworkInfo();
+      emit(NetworkState(
+        networkType: info['networkType'],
+        isp: info['isp'],
+      ));
+
+      await for (final info in _networkService.getNetworkStream()) {
+        emit(NetworkState(
+          networkType: info['networkType'],
+          isp: info['isp'],
+        ));
+      }
+    });
+
+    add(NetworkStatusRequested());
   }
 }

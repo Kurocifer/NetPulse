@@ -45,5 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Privacy description for accessing SIM card data -->
+	<key>NSContactsUsageDescription</key>
+	<string>We need access to your SIM card to detect the network operator.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Used for network analysis.</string>
 </dict>
 </plist>

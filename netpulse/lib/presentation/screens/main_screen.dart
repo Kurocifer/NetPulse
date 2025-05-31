@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:netpulse/presentation/screens/home_screen.dart';
 import 'package:netpulse/presentation/screens/metrics_screen.dart';

@@ -1,40 +1,38 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
+// import '../../data/services/network_service.dart';
 
-abstract class FeedbackEvent extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
+// abstract class NetworkEvent {}
 
-class SubmitFeedback extends FeedbackEvent {
-  final int rating;
-  final String comment;
-  SubmitFeedback(this.rating, this.comment);
-  @override
-  List<Object?> get props => [rating, comment];
-}
+// class NetworkStatusRequested extends NetworkEvent {}
 
-abstract class FeedbackState extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
+// class NetworkState {
+//   final String networkType;
+//   final String isp;
 
-class FeedbackInitial extends FeedbackState {}
-class FeedbackSubmitting extends FeedbackState {}
-class FeedbackSuccess extends FeedbackState {}
-class FeedbackError extends FeedbackState {
-  final String error;
-  FeedbackError(this.error);
-  @override
-  List<Object?> get props => [error];
-}
+//   NetworkState({required this.networkType, required this.isp});
+// }
 
-class FeedbackBloc extends Bloc<FeedbackEvent, FeedbackState> {
-  FeedbackBloc() : super(FeedbackInitial()) {
-    on<SubmitFeedback>(_onSubmitFeedback);
-  }
+// class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
+//   final NetworkService _networkService;
 
-  void _onSubmitFeedback(SubmitFeedback event, Emitter<FeedbackState> emit) {
-    // Placeholder
-  }
-}
+//   NetworkBloc(this._networkService)
+//       : super(NetworkState(networkType: 'Unknown', isp: 'Unknown')) {
+//     on<NetworkStatusRequested>((event, emit) async {
+//       final info = await _networkService.getNetworkInfo();
+//       emit(NetworkState(
+//         networkType: info['networkType'],
+//         isp: info['isp'],
+//       ));
+
+//       await for (final info in _networkService.getNetworkStream()) {
+//         emit(NetworkState(
+//           networkType: info['networkType'],
+//           isp: info['isp'],
+//         ));
+//       }
+//     });
+
+//     add(NetworkStatusRequested());
+//   }
+// }
+
