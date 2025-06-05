@@ -25,3 +25,4 @@ dist-ssr
 
 backend/.env
 setup-isp.js
+dashboard/src/supabase/supabaseClient.jsx
