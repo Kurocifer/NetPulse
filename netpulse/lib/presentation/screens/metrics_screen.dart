@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +7,7 @@ import '../../data/services/network_service.dart';
 import '../../data/services/location_service.dart';
 import '../blocs/network_bloc.dart';
 import 'dart:developer' as developer;
+import 'package:netpulse/main.dart';
 
 class MetricsScreen extends StatefulWidget {
   const MetricsScreen({super.key});
@@ -25,23 +25,6 @@ class _MetricsScreenState extends State<MetricsScreen> {
       return '${(quality / 1000).toStringAsFixed(1)} Mbps';
     }
     return '${quality.toStringAsFixed(0)} Kbps';
-  }
-
-  String formatYAxisLabel(double value, double maxQuality) {
-    final isMbps = maxQuality >= 1000;
-    final quality = isMbps ? value * 1000 : value;
-    String label;
-    if (isMbps) {
-      if (value >= 1) label = 'Good';
-      else if (value > 0.3) label = 'Fair';
-      else label = 'Poor';
-      return '${value.toStringAsFixed(1)} Mbps ($label)';
-    } else {
-      if (quality >= 1000) label = 'Good';
-      else if (quality > 300) label = 'Fair';
-      else label = 'Poor';
-      return '$quality Kbps ($label)';
-    }
   }
 
   String formatTime(DateTime time) {
@@ -63,8 +46,6 @@ class _MetricsScreenState extends State<MetricsScreen> {
     }
     for (var prefix in _ispPrefixes) {
       if (isp.startsWith(prefix)) {
-        var ispp = isp.split(' ').first;
-        print(ispp);
         return isp.split(' ').first;
       }
     }
@@ -127,7 +108,6 @@ class _MetricsScreenState extends State<MetricsScreen> {
       final latitude = position?.latitude;
       final longitude = position?.longitude;
 
-      // Log location access status
       developer.log('Location data - Latitude: $latitude, Longitude: $longitude');
       if (latitude == null || longitude == null) {
         developer.log('Location unavailable: Check permissions or GPS status.');
@@ -149,11 +129,23 @@ class _MetricsScreenState extends State<MetricsScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Metrics submitted successfully!')),
+        SnackBar(
+          content: Text('Metrics submitted successfully!', style: GoogleFonts.poppins(color: Colors.white)),
+          backgroundColor: secondaryColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.all(16),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error submitting metrics: $e')),
+        SnackBar(
+          content: Text('Error submitting metrics: $e', style: GoogleFonts.poppins(color: Colors.white)),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.all(16),
+        ),
       );
     } finally {
       setState(() {
@@ -162,443 +154,57 @@ class _MetricsScreenState extends State<MetricsScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => NetworkBloc(context.read<NetworkService>()),
-      child: Scaffold(
-        backgroundColor: Colors.grey[100],
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Network Metrics',
-                  style: GoogleFonts.poppins(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                FutureBuilder<List<Map<String, dynamic>>>(
-                  future: context.read<NetworkService>().getLoggedNetworkStates(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text('No data available.');
-                    }
-                    final loggedStates = snapshot.data!;
-                    final timestamps = loggedStates
-                        .map((state) => DateTime.parse(state['timestamp'] as String))
-                        .toList();
-                    final earliestTime = timestamps.reduce((a, b) => a.isBefore(b) ? a : b);
-                    final latestTime = timestamps.reduce((a, b) => a.isAfter(b) ? a : b);
-                    return Text(
-                      'From ${formatTime(earliestTime)} ${earliestTime.day} May to ${formatTime(latestTime)} ${latestTime.day} May',
-                      style: GoogleFonts.poppins(fontSize: 14, color: Colors.black54),
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                FutureBuilder<List<Map<String, dynamic>>>(
-                  future: context.read<NetworkService>().getLoggedNetworkStates(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-                    final loggedStates = snapshot.data!;
-                    final latestState = loggedStates.last;
-                    final networkType = latestState['networkType'] as String;
-                    final quality = (latestState['quality'] as num? ?? 0).toDouble();
-                    final latency = latestState['latency'] as String? ?? 'N/A';
-                    final packetLoss = latestState['packetLoss'] as String? ?? 'N/A';
+  // Helper to get network type icon
+  IconData _getNetworkTypeIcon(String networkType) {
+    switch (networkType) {
+      case 'Wi-Fi':
+        return Icons.wifi_rounded;
+      case 'Mobile':
+        return Icons.signal_cellular_alt_rounded;
+      case 'Offline':
+        return Icons.signal_cellular_off_rounded;
+      default:
+        return Icons.question_mark_rounded;
+    }
+  }
 
-                    return Column(
-                      children: [
-                        _buildMetricCard(
-                          icon: Icons.signal_cellular_alt,
-                          title: 'Signal Strength',
-                          value: getSignalStrength(quality),
-                          color: Colors.red[200],
-                        ),
-                        const SizedBox(height: 10),
-                        _buildMetricCard(
-                          icon: Icons.access_time,
-                          title: 'Latency',
-                          value: latency,
-                          color: Colors.blue[100],
-                        ),
-                        const SizedBox(height: 10),
-                        _buildMetricCard(
-                          icon: Icons.cloud,
-                          title: 'Packet Loss',
-                          value: packetLoss,
-                          color: Colors.green[100],
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    );
-                  },
-                ),
-                FutureBuilder<List<Map<String, dynamic>>>(
-                  future: context.read<NetworkService>().getLoggedNetworkStates(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-                    final loggedStates = snapshot.data!;
-                    final qualities = loggedStates
-                        .map((state) => (state['quality'] as num? ?? 0).toDouble())
-                        .toList();
-                    final avgQuality = qualities.reduce((a, b) => a + b) / qualities.length;
-                    final maxQuality = qualities.reduce((a, b) => a > b ? a : b);
-                    final minQuality = qualities.where((q) => q > 0).reduce((a, b) => a < b ? a : b);
-                    final uptime = (loggedStates.where((state) => state['networkType'] != 'Offline').length / loggedStates.length * 100).toStringAsFixed(1);
-
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildSummaryCard('Avg Throughput', formatThroughput(avgQuality)),
-                        _buildSummaryCard('Max Throughput', formatThroughput(maxQuality)),
-                        _buildSummaryCard('Min Throughput', formatThroughput(minQuality)),
-                        _buildSummaryCard('Uptime', '$uptime%'),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submitMetrics,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                    ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            'Submit Metrics',
-                            style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _buildFilterOptions(),
-                const SizedBox(height: 10),
-                FutureBuilder<List<Map<String, dynamic>>>(
-                  future: context.read<NetworkService>().getLoggedNetworkStates(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Container(
-                        padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: const Text('No data available for graph.'),
-                      );
-                    }
-
-                    final loggedStates = snapshot.data!;
-                    final filteredStates = _selectedFilter == 'All'
-                        ? loggedStates
-                        : loggedStates.where((state) => state['networkType'] == _selectedFilter).toList();
-
-                    if (filteredStates.isEmpty) {
-                      return Container(
-                        padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: const Text('No data available for the selected network type.'),
-                      );
-                    }
-
-                    // Ensure we have at least 2 data points to avoid interval issues
-                    if (filteredStates.length < 2) {
-                      return Container(
-                        padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: const Text('Not enough data to display the graph (minimum 2 data points required).'),
-                      );
-                    }
-
-                    List<FlSpot> wifiSpots = [];
-                    List<FlSpot> mobileSpots = [];
-                    List<FlSpot> offlineSpots = [];
-                    List<DateTime> timestamps = [];
-
-                    for (int i = 0; i < filteredStates.length; i++) {
-                      final state = filteredStates[i];
-                      final quality = (state['quality'] as num? ?? 0).toDouble();
-                      final timestamp = DateTime.parse(state['timestamp'] as String);
-                      timestamps.add(timestamp);
-
-                      switch (state['networkType']) {
-                        case 'Wi-Fi':
-                          wifiSpots.add(FlSpot(i.toDouble(), quality));
-                          break;
-                        case 'Mobile':
-                          mobileSpots.add(FlSpot(i.toDouble(), quality));
-                          break;
-                        default:
-                          offlineSpots.add(FlSpot(i.toDouble(), quality));
-                          break;
-                      }
-                    }
-
-                    final minQuality = filteredStates
-                        .map((state) => (state['quality'] as num? ?? 0).toDouble())
-                        .reduce((a, b) => a < b ? a : b);
-                    final maxQuality = filteredStates
-                        .map((state) => (state['quality'] as num? ?? 0).toDouble())
-                        .reduce((a, b) => a > b ? a : b);
-                    final yRange = maxQuality - minQuality;
-
-                    const desiredLabelCount = 6;
-                    final rawInterval = yRange == 0 ? 50.0 : yRange / (desiredLabelCount - 1); // Prevent zero yRange
-                    final yInterval = max(rawInterval, 50.0);
-
-                    final roundedMinQuality = ((minQuality / 50).floor() * 50).toDouble();
-                    final roundedMaxQuality = (((maxQuality + 50) / 50).ceil() * 50).toDouble();
-                    final isMbps = maxQuality >= 1000;
-
-                    // Ensure bottom interval is never zero
-                    final bottomInterval = (filteredStates.length - 1) / 4 == 0 ? 1.0 : (filteredStates.length - 1) / 4;
-
-                    return Container(
-                      padding: const EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Throughput Over Time',
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            height: 350,
-                            child: LineChart(
-                              LineChartData(
-                                gridData: const FlGridData(show: false),
-                                titlesData: FlTitlesData(
-                                  bottomTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 50,
-                                      interval: bottomInterval,
-                                      getTitlesWidget: (value, meta) {
-                                        final index = value.toInt().clamp(0, timestamps.length - 1);
-                                        return SideTitleWidget(
-                                          axisSide: meta.axisSide,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(top: 4.0),
-                                            child: Text(
-                                              formatTime(timestamps[index]),
-                                              style: GoogleFonts.poppins(fontSize: 10),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 80,
-                                      interval: yInterval,
-                                      getTitlesWidget: (value, meta) {
-                                        return SideTitleWidget(
-                                          axisSide: meta.axisSide,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(right: 8.0),
-                                            child: Text(
-                                              formatYAxisLabel(value, maxQuality),
-                                              style: GoogleFonts.poppins(fontSize: 9),
-                                              textAlign: TextAlign.right,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  topTitles: const AxisTitles(sideTitles: SideTitles()),
-                                  rightTitles: const AxisTitles(sideTitles: SideTitles()),
-                                ),
-                                borderData: FlBorderData(show: true),
-                                minX: 0,
-                                maxX: (filteredStates.length - 1).toDouble(),
-                                minY: roundedMinQuality < 0 ? 0 : roundedMinQuality,
-                                maxY: roundedMaxQuality,
-                                lineBarsData: [
-                                  if (_selectedFilter == 'All' || _selectedFilter == 'Wi-Fi')
-                                    LineChartBarData(
-                                      spots: wifiSpots,
-                                      isCurved: true,
-                                      color: Colors.blue,
-                                      dotData: const FlDotData(show: false),
-                                      belowBarData: BarAreaData(
-                                        show: true,
-                                        color: Colors.blue.withOpacity(0.1),
-                                      ),
-                                    ),
-                                  if (_selectedFilter == 'All' || _selectedFilter == 'Mobile')
-                                    LineChartBarData(
-                                      spots: mobileSpots,
-                                      isCurved: true,
-                                      color: Colors.green,
-                                      dotData: const FlDotData(show: false),
-                                      belowBarData: BarAreaData(
-                                        show: true,
-                                        color: Colors.green.withOpacity(0.1),
-                                      ),
-                                    ),
-                                  if (_selectedFilter == 'All' || _selectedFilter == 'Offline')
-                                    LineChartBarData(
-                                      spots: offlineSpots,
-                                      isCurved: true,
-                                      color: Colors.red,
-                                      dotData: const FlDotData(show: false),
-                                      belowBarData: BarAreaData(
-                                        show: true,
-                                        color: Colors.red.withOpacity(0.1),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                FutureBuilder<List<Map<String, dynamic>>>(
-                  future: context.read<NetworkService>().getLoggedNetworkStates(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-                    final loggedStates = snapshot.data!;
-                    final wifiStates = loggedStates.where((state) => state['networkType'] == 'Wi-Fi').toList();
-                    final mobileStates = loggedStates.where((state) => state['networkType'] == 'Mobile').toList();
-                    final offlineCount = loggedStates.where((state) => state['networkType'] == 'Offline').length;
-                    String insight = '';
-
-                    if (wifiStates.isNotEmpty) {
-                      final maxWifi = wifiStates.reduce((a, b) => (a['quality'] as num) > (b['quality'] as num) ? a : b);
-                      final maxWifiTime = DateTime.parse(maxWifi['timestamp'] as String);
-                      insight += 'Wi-Fi peaked at ${formatThroughput((maxWifi['quality'] as num).toDouble())} on ${formatTime(maxWifiTime)}.\n';
-                    }
-                    if (mobileStates.isNotEmpty) {
-                      final poorMobileCount = mobileStates.where((state) => (state['quality'] as num) < 300).length;
-                      if (poorMobileCount > 0) {
-                        insight += 'Mobile data dropped below 300 Kbps $poorMobileCount times—check your signal strength.';
-                      }
-                    }
-                    if (offlineCount > 5) {
-                      insight += '\nYour network was offline $offlineCount times. Consider checking your connection stability.';
-                    }
-
-                    if (insight.isEmpty) return const SizedBox.shrink();
-                    return Container(
-                      padding: const EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.teal[100],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        'Insights:\n$insight',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.teal[900],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+  // Helper to build header section
+  Widget _buildHeader(ColorScheme colorScheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Network Metrics',
+          style: GoogleFonts.poppins(
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            color: colorScheme.onBackground,
           ),
         ),
-      ),
+        const SizedBox(height: 8),
+        Text(
+          'Detailed insights into your network performance.',
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            color: colorScheme.onBackground.withOpacity(0.7),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildMetricCard({required IconData icon, required String title, required String value, required Color? color}) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+  Widget _buildInfoSection({
+    required String title,
+    required String value,
+    required IconData icon,
+    required ColorScheme colorScheme,
+    bool isError = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Icon(icon, size: 40, color: Colors.black54),
+          Icon(icon, size: 28, color: isError ? colorScheme.error : secondaryColor),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -606,11 +212,19 @@ class _MetricsScreenState extends State<MetricsScreen> {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onBackground.withOpacity(0.8),
+                  ),
                 ),
                 Text(
                   value,
-                  style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isError ? colorScheme.error : colorScheme.onBackground,
+                  ),
                 ),
               ],
             ),
@@ -620,76 +234,647 @@ class _MetricsScreenState extends State<MetricsScreen> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value) {
+  // Helper to build summary item
+  Widget _buildSummaryItem(String title, String value, ColorScheme colorScheme) {
     return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4.0),
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: const Offset(0, 2),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: colorScheme.onBackground.withOpacity(0.7),
             ),
-          ],
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onBackground,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper to build filter options
+  Widget _buildFilterOptions(ColorScheme colorScheme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: ['All', 'Wi-Fi', 'Mobile', 'Offline'].map((filter) {
+        final isSelected = _selectedFilter == filter;
+        return ChoiceChip(
+          label: Text(filter),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) {
+              setState(() {
+                _selectedFilter = filter;
+              });
+            }
+          },
+          selectedColor: secondaryColor,
+          backgroundColor: colorScheme.surfaceVariant,
+          labelStyle: GoogleFonts.poppins(
+            color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(color: isSelected ? secondaryColor : Colors.transparent),
+          ),
+          elevation: 0,
+        );
+      }).toList(),
+    );
+  }
+
+  // Helper for empty chart placeholder
+  Widget _buildEmptyChartPlaceholder(ColorScheme colorScheme, String message) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(Icons.show_chart_rounded, size: 60, color: colorScheme.onBackground.withOpacity(0.4)),
+        const SizedBox(height: 16),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            color: colorScheme.onBackground.withOpacity(0.7),
+          ),
         ),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: GoogleFonts.poppins(fontSize: 12, color: Colors.black54),
-              textAlign: TextAlign.center,
+      ],
+    );
+  }
+
+  // Helper to build insights section
+  Widget _buildInsightsSection(ColorScheme colorScheme, List<Map<String, dynamic>> loggedStates) {
+    String insightMessage = 'No specific insights yet.';
+    IconData insightIcon = Icons.info_outline_rounded;
+    Color insightIconColor = colorScheme.onBackground.withOpacity(0.7);
+
+    if (loggedStates.isNotEmpty) {
+      final latestQuality = (loggedStates.last['quality'] as num? ?? 0).toDouble();
+      final offlineCount = loggedStates.where((s) => s['networkType'] == 'Offline').length;
+      final totalEntries = loggedStates.length;
+
+      if (offlineCount / totalEntries > 0.5) {
+        insightMessage = 'Frequent disconnections detected. Consider checking your router or mobile data plan.';
+        insightIcon = Icons.wifi_off_rounded;
+        insightIconColor = Colors.redAccent;
+      } else if (latestQuality <= 300 && latestQuality > 0) {
+        insightMessage = 'Your current connection is poor. Try moving closer to your Wi-Fi source or switching to mobile data.';
+        insightIcon = Icons.lightbulb_outline_rounded;
+        insightIconColor = Colors.orangeAccent;
+      } else if (latestQuality > 300 && latestQuality <= 1000) {
+        insightMessage = 'Your connection is average. For better performance, close background applications or optimize network settings.';
+        insightIcon = Icons.tune_rounded;
+        insightIconColor = colorScheme.primary;
+      } else if (latestQuality > 1000) {
+        insightMessage = 'Excellent network performance! Enjoy seamless browsing and streaming.';
+        insightIcon = Icons.check_circle_outline_rounded;
+        insightIconColor = Colors.green;
+      } else {
+        insightMessage = 'Network status unknown. Ensure monitoring is active.';
+        insightIcon = Icons.help_outline_rounded;
+        insightIconColor = colorScheme.onBackground.withOpacity(0.5);
+      }
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(insightIcon, color: insightIconColor, size: 28),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            insightMessage,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              color: colorScheme.onBackground.withOpacity(0.7),
+              height: 1.5,
             ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
-              textAlign: TextAlign.center,
-            ),
-          ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper to build gradient action button
+  Widget _buildActionButton({
+    required BuildContext context,
+    required String label,
+    required IconData icon,
+    required VoidCallback? onPressed,
+    LinearGradient? buttonGradient,
+    required Color textColor,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: buttonGradient,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          foregroundColor: textColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.zero,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 28),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildFilterOptions() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return BlocProvider(
+      create: (context) => NetworkBloc(context.read<NetworkService>()),
+      child: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDarkMode
+                  ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+                  : [colorScheme.background, secondaryColor.withOpacity(0.3)],
+            ),
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Filter by Network Type:',
-            style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+          child: SafeArea(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: context.read<NetworkService>().getLoggedNetworkStates(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(color: secondaryColor),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Text(
+                        'Error loading data: ${snapshot.error}',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(color: colorScheme.error, fontSize: 16),
+                      ),
+                    ),
+                  );
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildHeader(colorScheme),
+                        _buildInfoSection(
+                          title: 'No Data Available',
+                          value: 'Please ensure network monitoring is active and data is being logged.',
+                          icon: Icons.info_outline_rounded,
+                          colorScheme: colorScheme,
+                          isError: true,
+                        ),
+                        const SizedBox(height: 30),
+                        _buildActionButton( // Use the styled button
+                          context: context,
+                          label: 'Submit Latest Metrics',
+                          icon: Icons.send_rounded,
+                          onPressed: _isSubmitting ? null : _submitMetrics,
+                          buttonGradient: LinearGradient(
+                            colors: [primaryColor, secondaryColor],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          textColor: colorScheme.onPrimary,
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // Data is available, proceed with building the UI
+                final loggedStates = snapshot.data!;
+                final timestamps = loggedStates
+                    .map((state) => DateTime.parse(state['timestamp'] as String))
+                    .toList();
+                final earliestTime = timestamps.reduce((a, b) => a.isBefore(b) ? a : b);
+                final latestTime = timestamps.reduce((a, b) => a.isAfter(b) ? a : b);
+
+                final latestState = loggedStates.last;
+                final networkType = latestState['networkType'] as String;
+                final quality = (latestState['quality'] as num? ?? 0).toDouble();
+                final latency = latestState['latency'] as String? ?? 'N/A';
+                final packetLoss = latestState['packetLoss'] as String? ?? 'N/A';
+                // final isp = latestState['isp'] as String;
+
+                final allQualities = loggedStates.map((state) => (state['quality'] as num? ?? 0).toDouble()).toList();
+                final avgQuality = allQualities.reduce((a, b) => a + b) / allQualities.length;
+                final maxQuality = allQualities.reduce((a, b) => a > b ? a : b);
+                final minQuality = allQualities.where((q) => q > 0).isEmpty ? 0.0 : allQualities.where((q) => q > 0).reduce((a, b) => a < b ? a : b);
+                final uptime = (loggedStates.where((state) => state['networkType'] != 'Offline').length / loggedStates.length * 100).toStringAsFixed(1);
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildHeader(colorScheme),
+                      const SizedBox(height: 30),
+
+                      Text(
+                        'Current Network Status',
+                        style: GoogleFonts.poppins(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onBackground,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Column(
+                        children: [
+                          _buildInfoSection(
+                            title: 'Network Type',
+                            value: networkType,
+                            icon: _getNetworkTypeIcon(networkType),
+                            colorScheme: colorScheme,
+                          ),
+                          const SizedBox(height: 10),
+                          _buildInfoSection(
+                            title: 'Signal Strength',
+                            value: getSignalStrength(quality),
+                            icon: Icons.signal_cellular_alt_rounded,
+                            colorScheme: colorScheme,
+                          ),
+                          const SizedBox(height: 10),
+                          _buildInfoSection(
+                            title: 'Throughput',
+                            value: formatThroughput(quality),
+                            icon: Icons.download_rounded,
+                            colorScheme: colorScheme,
+                          ),
+                          const SizedBox(height: 10),
+                          _buildInfoSection(
+                            title: 'Latency',
+                            value: latency,
+                            icon: Icons.access_time_rounded,
+                            colorScheme: colorScheme,
+                          ),
+                          const SizedBox(height: 10),
+                          _buildInfoSection(
+                            title: 'Packet Loss',
+                            value: packetLoss,
+                            icon: Icons.cloud_off_rounded,
+                            colorScheme: colorScheme,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+
+                      Text(
+                        'Overall Performance Summary',
+                        style: GoogleFonts.poppins(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onBackground,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildSummaryItem('Avg Throughput', formatThroughput(avgQuality), colorScheme),
+                          _buildSummaryItem('Max Throughput', formatThroughput(maxQuality), colorScheme),
+                          _buildSummaryItem('Min Throughput', formatThroughput(minQuality), colorScheme),
+                          _buildSummaryItem('Uptime', '$uptime%', colorScheme),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+
+                      _buildActionButton(
+                        context: context,
+                        label: 'Submit Network Metrics',
+                        icon: Icons.send_rounded,
+                        onPressed: _isSubmitting ? null : _submitMetrics,
+                        buttonGradient: LinearGradient(
+                          colors: [primaryColor, secondaryColor],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        textColor: colorScheme.onPrimary,
+                      ),
+                      const SizedBox(height: 40),
+
+                      Text(
+                        'Throughput Over Time',
+                        style: GoogleFonts.poppins(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onBackground,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildFilterOptions(colorScheme),
+                      const SizedBox(height: 20),
+                      FutureBuilder<List<Map<String, dynamic>>>(
+                        future: context.read<NetworkService>().getLoggedNetworkStates(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(Icons.show_chart_rounded, size: 60, color: colorScheme.onBackground.withOpacity(0.4)),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No historical data available yet.\nStart monitoring to see trends.',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    color: colorScheme.onBackground.withOpacity(0.7),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+
+                          final loggedStates = snapshot.data!;
+                          final filteredStates = _selectedFilter == 'All'
+                              ? loggedStates
+                              : loggedStates.where((state) => state['networkType'] == _selectedFilter).toList();
+
+                          if (filteredStates.isEmpty) {
+                            return _buildEmptyChartPlaceholder(colorScheme, 'No data available for the selected network type.');
+                          }
+                          if (filteredStates.length < 2) {
+                             return _buildEmptyChartPlaceholder(colorScheme, 'Not enough data to display the graph (minimum 2 data points required).');
+                          }
+
+
+                          List<FlSpot> wifiSpots = [];
+                          List<FlSpot> mobileSpots = [];
+                          List<FlSpot> offlineSpots = [];
+                          List<DateTime> timestamps = [];
+
+                          for (int i = 0; i < filteredStates.length; i++) {
+                            final state = filteredStates[i];
+                            final quality = (state['quality'] as num? ?? 0).toDouble();
+                            final timestamp = DateTime.parse(state['timestamp'] as String);
+                            timestamps.add(timestamp);
+
+                            final xValue = i.toDouble();
+
+                            switch (state['networkType']) {
+                              case 'Wi-Fi':
+                                wifiSpots.add(FlSpot(xValue, quality));
+                                break;
+                              case 'Mobile':
+                                mobileSpots.add(FlSpot(xValue, quality));
+                                break;
+                              default:
+                                offlineSpots.add(FlSpot(xValue, quality));
+                                break;
+                            }
+                          }
+
+                          final allQualitiesInFiltered = filteredStates.map((state) => (state['quality'] as num? ?? 0).toDouble()).toList();
+                          final minQuality = allQualitiesInFiltered.reduce((a, b) => a < b ? a : b);
+                          final maxQuality = allQualitiesInFiltered.reduce((a, b) => a > b ? a : b);
+                          final yRange = maxQuality - minQuality;
+
+                          const desiredLabelCount = 5;
+                          final rawInterval = yRange <= 0 ? 100.0 : yRange / (desiredLabelCount - 1);
+                          final yInterval = (rawInterval / 50).ceil() * 50.0;
+
+                          final roundedMinQuality = (minQuality - 50).floorToDouble().clamp(0.0, double.infinity);
+                          final roundedMaxQuality = (maxQuality + 50).ceilToDouble();
+
+                          double bottomInterval = (filteredStates.length > 1)
+                              ? (filteredStates.length - 1) / 4
+                              : 1.0;
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Latest: ${formatThroughput(maxQuality)}', 
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: colorScheme.onBackground,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${formatTime(earliestTime)} - ${formatTime(latestTime)}',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      color: colorScheme.onBackground.withOpacity(0.7),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              SizedBox(
+                                height: 250,
+                                child: LineChart(
+                                  LineChartData(
+                                    gridData: FlGridData(
+                                      show: true,
+                                      drawVerticalLine: false,
+                                      horizontalInterval: yInterval,
+                                      getDrawingHorizontalLine: (value) => FlLine(
+                                        color: colorScheme.onBackground.withOpacity(0.1),
+                                        strokeWidth: 0.5,
+                                      ),
+                                    ),
+                                    titlesData: FlTitlesData(
+                                      bottomTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          reservedSize: 30,
+                                          interval: bottomInterval,
+                                          getTitlesWidget: (value, meta) {
+                                            if (timestamps.length <= 1) {
+                                              return SideTitleWidget(
+                                                axisSide: meta.axisSide,
+                                                child: Text('N/A', style: GoogleFonts.poppins(fontSize: 10, color: colorScheme.onBackground.withOpacity(0.7))),
+                                              );
+                                            }
+                                            final index = value.toInt().clamp(0, timestamps.length - 1);
+                                            return SideTitleWidget(
+                                              axisSide: meta.axisSide,
+                                              child: Text(
+                                                formatTime(timestamps[index]),
+                                                style: GoogleFonts.poppins(fontSize: 10, color: colorScheme.onBackground.withOpacity(0.7)),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      leftTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          reservedSize: 60,
+                                          interval: yInterval,
+                                          getTitlesWidget: (value, meta) {
+                                            return SideTitleWidget(
+                                              axisSide: meta.axisSide,
+                                              child: Text(
+                                                formatThroughput(value),
+                                                style: GoogleFonts.poppins(fontSize: 10, color: colorScheme.onBackground.withOpacity(0.7)),
+                                                textAlign: TextAlign.right,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                    ),
+                                    borderData: FlBorderData(show: false),
+                                    minX: 0,
+                                    maxX: (filteredStates.length > 0) ? (filteredStates.length - 1).toDouble() : 0,
+                                    minY: roundedMinQuality,
+                                    maxY: roundedMaxQuality,
+                                    lineBarsData: [
+                                      if (_selectedFilter == 'All' || _selectedFilter == 'Wi-Fi')
+                                        LineChartBarData(
+                                          spots: wifiSpots,
+                                          isCurved: true,
+                                          color: secondaryColor,
+                                          barWidth: 2,
+                                          isStrokeCapRound: true,
+                                          dotData: const FlDotData(show: false),
+                                          belowBarData: BarAreaData(
+                                            show: true,
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                secondaryColor.withOpacity(0.15),
+                                                secondaryColor.withOpacity(0.0),
+                                              ],
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                            ),
+                                          ),
+                                        ),
+                                      if (_selectedFilter == 'All' || _selectedFilter == 'Mobile')
+                                        LineChartBarData(
+                                          spots: mobileSpots,
+                                          isCurved: true,
+                                          color: colorScheme.primary, // Mobile color
+                                          barWidth: 2,
+                                          isStrokeCapRound: true,
+                                          dotData: const FlDotData(show: false),
+                                          belowBarData: BarAreaData(
+                                            show: true,
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                colorScheme.primary.withOpacity(0.15),
+                                                colorScheme.primary.withOpacity(0.0),
+                                              ],
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                            ),
+                                          ),
+                                        ),
+                                      if (_selectedFilter == 'All' || _selectedFilter == 'Offline')
+                                        LineChartBarData(
+                                          spots: offlineSpots,
+                                          isCurved: true,
+                                          color: Colors.redAccent,
+                                          barWidth: 2,
+                                          isStrokeCapRound: true,
+                                          dotData: const FlDotData(show: false),
+                                          belowBarData: BarAreaData(
+                                            show: true,
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Colors.redAccent.withOpacity(0.15),
+                                                Colors.redAccent.withOpacity(0.0),
+                                              ],
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 40),
+
+                      Text(
+                        'Insights & Recommendations',
+                        style: GoogleFonts.poppins(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onBackground,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      FutureBuilder<List<Map<String, dynamic>>>(
+                        future: context.read<NetworkService>().getLoggedNetworkStates(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return _buildInfoSection(
+                              title: 'No Insights Available',
+                              value: 'No network data to generate insights.',
+                              icon: Icons.info_outline_rounded,
+                              colorScheme: colorScheme,
+                              isError: true,
+                            );
+                          }
+                          final loggedStates = snapshot.data!;
+                          return _buildInsightsSection(colorScheme, loggedStates);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-          DropdownButton<String>(
-            value: _selectedFilter,
-            items: ['All', 'Wi-Fi', 'Mobile', 'Offline']
-                .map((type) => DropdownMenuItem(value: type, child: Text(type, style: GoogleFonts.poppins())))
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedFilter = value!; // Fixed variable name from _submitMetrics to _selectedFilter
-              });
-            },
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -56,6 +56,6 @@ class PhoneService {
   Future<void> _saveSimInfo(SimInfo? simInfo) async {
     if (simInfo == null) return;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_carrier_name', simInfo.carrierName ?? 'Unknown'); // Use carrierName
+    await prefs.setString('last_carrier_name', simInfo.carrierName);
   }
 }

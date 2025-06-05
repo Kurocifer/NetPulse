@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:dart_ping/dart_ping.dart';
 import 'phone_service.dart';
@@ -65,7 +64,7 @@ class NetworkService {
 
     if (result == ConnectivityResult.wifi) {
       networkInfo['networkType'] = 'Wi-Fi';
-      networkInfo['isp'] = 'Unknown';
+      networkInfo['isp'] = 'Wi-Fi';
     } else if (result == ConnectivityResult.mobile) {
       networkInfo['networkType'] = 'Mobile';
     } else if (result == ConnectivityResult.none) {

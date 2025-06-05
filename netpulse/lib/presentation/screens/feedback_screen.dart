@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/services/network_service.dart';
 import 'dart:developer' as developer;
+import 'package:netpulse/main.dart';
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});
@@ -17,40 +18,43 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   final TextEditingController _commentController = TextEditingController();
   bool _isSubmitting = false;
 
-  // List of known ISP prefixes
   final List<String> _ispPrefixes = ['MTN', 'ORANGE', 'CAMTEL'];
 
   String _determineIsp(String isp, String networkType) {
-    // For Wi-Fi or Offline, always return "MTN"
     if (networkType == 'Wi-Fi' || networkType == 'Offline') {
       return 'MTN';
     }
 
-    // Check if ISP starts with any known prefix
     for (var prefix in _ispPrefixes) {
       if (isp.startsWith(prefix)) {
-        // Trim the ISP name up to the space or end
         return isp.split(' ').first;
       }
     }
 
-    // Fallback: return "MTN" if no match is found
     return 'MTN';
   }
 
   Future<void> _submitFeedback() async {
-    // Validation
     if (_rating == 0) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select a rating.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please select a rating.', style: GoogleFonts.poppins(color: Colors.white)),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
       return;
     }
-    if (_commentController.text.isNotEmpty &&
-        _commentController.text.length < 10) {
+    if (_commentController.text.isNotEmpty && _commentController.text.trim().length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Comment must be at least 10 characters if provided.'),
+        SnackBar(
+          content: Text('Comment must be at least 10 characters if provided.', style: GoogleFonts.poppins(color: Colors.white)),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.all(16),
         ),
       );
       return;
@@ -66,33 +70,25 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         throw Exception('User not authenticated.');
       }
 
-      // Log the user email for debugging
       final queryEmail = (user.email ?? '').trim();
       developer.log('Auth User Email (trimmed): "$queryEmail"');
 
-      // Query Users table by email with case-insensitive match
       final response = await Supabase.instance.client
           .from('Users')
-          .select('UserID') // Include email to verify
+          .select('UserID')
           .ilike('Email', queryEmail)
-          .limit(1); // Limit to 1 row to avoid multiple matches
+          .limit(1);
       print('Users table query response: $response');
 
       if (response.isEmpty) {
-        // Fallback: Log all emails to debug
-        final allUsers = await Supabase.instance.client
-            .from('Users')
-            .select('email');
+        final allUsers = await Supabase.instance.client.from('Users').select('email');
         developer.log('All emails in Users table: $allUsers');
-        throw Exception(
-          'User not found in Users table with email: "$queryEmail"',
-        );
+        throw Exception('User not found in Users table with email: "$queryEmail"');
       }
       final userIdFromUsersTable = response.first['UserID'] as String;
 
       developer.log('User ID from Users table: $userIdFromUsersTable');
 
-      // Fetch the latest network state to get ISP and network type
       final networkService = context.read<NetworkService>();
       final loggedStates = await networkService.getLoggedNetworkStates();
       if (loggedStates.isEmpty) {
@@ -102,10 +98,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       final networkType = latestState['networkType'] as String;
       final isp = latestState['isp'] as String;
 
-      // Determine the ISP to send
       final ispToSend = _determineIsp(isp, networkType);
 
-      // Submit feedback to Supabase using the Users table id
       await Supabase.instance.client.from('FeedBack').insert({
         'UserID': userIdFromUsersTable,
         'Rating': _rating,
@@ -114,18 +108,29 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Thank you for your feedback!')),
+        SnackBar(
+          content: Text('Thank you for your feedback!', style: GoogleFonts.poppins(color: Colors.white)),
+          backgroundColor: secondaryColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.all(16),
+        ),
       );
 
-      // Reset form
       setState(() {
         _rating = 0;
         _commentController.clear();
       });
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error submitting feedback: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error submitting feedback: $e', style: GoogleFonts.poppins(color: Colors.white)),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
     } finally {
       setState(() {
         _isSubmitting = false;
@@ -146,141 +151,207 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildActionButton({
+    required BuildContext context,
+    required String label,
+    required IconData icon,
+    required VoidCallback? onPressed,
+    LinearGradient? buttonGradient,
+    required Color textColor,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: buttonGradient,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          foregroundColor: textColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.zero,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Header
-              Text(
-                'Feedback',
-                style: GoogleFonts.poppins(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              Icon(icon, size: 28),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // Star Rating
-              Text(
-                'Rate your experience',
-                style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: List.generate(5, (index) {
-                  final starIndex = index + 1;
-                  return IconButton(
-                    onPressed: () {
-                      setState(() {
-                        // Set the rating directly based on starIndex
-                        _rating = starIndex;
-                      });
-                    },
-                    icon: Icon(
-                      _rating >= starIndex ? Icons.star : Icons.star_border,
-                      color: Colors.amber,
-                      size: 40,
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    constraints: const BoxConstraints(),
-                  );
-                }),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Comment Field
-              Text(
-                'Your Feedback',
-                style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _commentController,
-                maxLines: 5,
-                decoration: InputDecoration(
-                  hintText: 'Tell us about your experience...',
-                  hintStyle: GoogleFonts.poppins(color: Colors.black54),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.teal),
-                  ),
-                ),
-                style: GoogleFonts.poppins(),
-              ),
-              const SizedBox(height: 20),
-
-              // Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _isSubmitting ? null : _submitFeedback,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              'Submit',
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _clearForm,
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.teal),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text(
-                        'Clear',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.teal,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDarkMode
+                ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+                : [colorScheme.background, secondaryColor.withOpacity(0.3)],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch, 
+              children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.rate_review_rounded,
+                        size: 50,
+                        color: secondaryColor,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Give Your Feedback',
+                        style: GoogleFonts.poppins(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onBackground,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Help us improve your network monitoring experience.',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: colorScheme.onBackground.withOpacity(0.7),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 30),
+
+                Text(
+                  'Rate your experience:',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onBackground,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: List.generate(5, (index) {
+                    final starIndex = index + 1;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _rating = starIndex;
+                        });
+                      },
+                      child: Icon(
+                        _rating >= starIndex ? Icons.star_rounded : Icons.star_border_rounded,
+                        color: _rating >= starIndex ? Colors.amber[600] : colorScheme.onBackground.withOpacity(0.4),
+                        size: 48,
+                      ),
+                    );
+                  }),
+                ),
+
+                const SizedBox(height: 30),
+
+                Text(
+                  'Your Comments:',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onBackground,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _commentController,
+                  maxLines: 5,
+                  maxLength: 500,
+                  decoration: InputDecoration(
+                    hintText: 'Tell us about your experience...',
+                    hintStyle: GoogleFonts.poppins(color: colorScheme.onSurface.withOpacity(0.5)),
+                    filled: true,
+                    fillColor: colorScheme.surface,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: secondaryColor, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.all(16.0),
+                  ),
+                  style: GoogleFonts.poppins(
+                    color: colorScheme.onSurface,
+                  ),
+                  cursorColor: secondaryColor,
+                ),
+                const SizedBox(height: 30),
+
+                _buildActionButton(
+                  context: context,
+                  label: 'Submit Feedback',
+                  icon: Icons.send_rounded,
+                  onPressed: _isSubmitting ? null : _submitFeedback,
+                  buttonGradient: LinearGradient(
+                    colors: [primaryColor, secondaryColor],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  textColor: colorScheme.onPrimary,
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: _clearForm,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: secondaryColor, width: 1.5),
+                    foregroundColor: secondaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  child: const Text('Clear Form'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

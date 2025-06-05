@@ -6,6 +6,9 @@ import '../blocs/auth_bloc.dart';
 import '../blocs/auth_event.dart';
 import '../blocs/auth_state.dart';
 
+
+import 'package:netpulse/main.dart'; 
+
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
 
@@ -33,10 +36,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Network Monitor', style: GoogleFonts.poppins(fontSize: 24, color: Colors.white)),
-      ),
       body: BlocListener<AuthBloc, NetpulseAuthState>(
         listener: (context, state) {
           if (state is NetpulseAuthSuccess) {
@@ -56,158 +59,229 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
+                  backgroundColor: colorScheme.surface,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  title: Center( // Centered title
+                  title: Center(
                     child: Text(
                       'Account Creation Failed',
-                      style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                      style: GoogleFonts.poppins(
+                        color: colorScheme.error,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
                   ),
                   content: Text(
                     errorMessage,
-                    style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       child: Text(
                         'OK',
-                        style: GoogleFonts.poppins(color: Color(0xFF1E88E5), fontWeight: FontWeight.bold),
+                        style: GoogleFonts.poppins(
+                          color: colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ],
-                  backgroundColor: Colors.white,
-                  elevation: 8,
+                  actionsAlignment: MainAxisAlignment.center,
+                  elevation: 10,
                 );
               },
             );
           }
         },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Create your account', style: GoogleFonts.poppins(fontSize: 32, color: Colors.black87)),
-                const SizedBox(height: 40),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: const Icon(Icons.email, color: Color(0xFF1E88E5)),
-                    border: InputBorder.none,
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 2),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                  ),
-                  validator: (value) {
-                    if (value == null || !value.contains('@')) return 'Enter a valid email';
-                    return null;
-                  },
+        child: Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDarkMode
+                      ? [const Color(0xFF0F0F1A), primaryColor]
+                      : [colorScheme.surface, primaryColor.withOpacity(0.8)],
                 ),
-                const SizedBox(height: 15),
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'Phone number (optional)',
-                    prefixIcon: const Icon(Icons.phone, color: Color(0xFF1E88E5)),
-                    border: InputBorder.none,
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 2),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                  ),
-                  validator: (value) {
-                    if (value != null && (!value.startsWith('+') || value.length < 10)) return 'Enter a valid phone number';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 15),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock, color: Color(0xFF1E88E5)),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off, color: Color(0xFF1E88E5)),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                    border: InputBorder.none,
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 2),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                  ),
-                  validator: (value) {
-                    if (value == null || value.length < 6) return 'Password must be at least 6 characters';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 15),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm password',
-                    prefixIcon: const Icon(Icons.lock, color: Color(0xFF1E88E5)),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off, color: Color(0xFF1E88E5)),
-                      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
-                    ),
-                    border: InputBorder.none,
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 2),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                  ),
-                  validator: (value) {
-                    if (value != _passwordController.text) return 'Passwords do not match';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        context.read<AuthBloc>().add(AuthSignUpRequested(
-                              _emailController.text,
-                              _passwordController.text,
-                              _phoneController.text,
-                            ));
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E88E5),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                    ),
-                    child: Text('Create Account', style: GoogleFonts.poppins(color: Colors.white)),
-                  ),
-                ),
-                const SizedBox(height: 15),
-                TextButton(
-                  onPressed: () => Get.back(),
-                  child: Text('Back to Login', style: GoogleFonts.poppins(color: Color(0xFF1E88E5))),
-                ),
-              ],
+              ),
             ),
-          ),
+            // Content
+            SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Image.asset(
+                        'assets/images/netpulse_logo.png',
+                        height: 90,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Create Your Account',
+                        style: GoogleFonts.poppins(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Tap in',
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          color: colorScheme.onPrimary.withOpacity(0.8),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        'Your Voice, Your Network',
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          color: colorScheme.onPrimary.withOpacity(0.8),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 48),
+
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.email_rounded, color: colorScheme.secondary),
+                          hintText: 'Enter your email',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Enter a valid email address';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          labelText: 'Phone number',
+                          prefixIcon: Icon(Icons.phone_rounded, color: colorScheme.secondary),
+                          hintText: 'e.g., +1234567890',
+                        ),
+                        validator: (value) {
+                          if (value != null && value.isNotEmpty && (!value.startsWith('+') || value.length < 10)) {
+                            return 'Enter a valid phone number (e.g., +1234567890)';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: Icon(Icons.lock_rounded, color: colorScheme.secondary),
+                          hintText: 'Enter your password',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                              color: colorScheme.secondary,
+                            ),
+                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a password';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: _confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm password',
+                          prefixIcon: Icon(Icons.lock_reset_rounded, color: colorScheme.secondary),
+                          hintText: 'Confirm your password',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                              color: colorScheme.secondary,
+                            ),
+                            onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          if (value != _passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            context.read<AuthBloc>().add(AuthSignUpRequested(
+                                  _emailController.text,
+                                  _passwordController.text,
+                                  _phoneController.text,
+                                ));
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50), 
+                        ),
+                        child: Text(
+                          'Create Account',
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextButton(
+                        onPressed: () => Get.back(),
+                        child: Text(
+                          'Back to Login',
+                          style: GoogleFonts.poppins(
+                            color: colorScheme.secondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
