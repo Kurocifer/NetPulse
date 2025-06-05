@@ -396,7 +396,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -428,7 +428,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -460,7 +460,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -557,7 +557,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
+                      color: colorScheme.onSurface,
+                      //color: colorScheme.primary,
                     ),
                   ),
                 ),

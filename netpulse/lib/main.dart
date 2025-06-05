@@ -15,10 +15,8 @@ import 'presentation/blocs/auth_bloc.dart';
 import 'presentation/blocs/network_bloc.dart';
 import 'routes.dart';
 
-// --- Custom Color Definitions ---
 const Color primaryColor = Color.fromARGB(255, 15, 52, 170); // Dark Blue: #051650
 const Color secondaryColor = Color.fromARGB(255, 57, 99, 228); // Medium Blue: #123499
-// --- End Custom Color Definitions ---
 
 
 const String backgroundTaskKey = "com.example.netpulse.networkMonitoringTask";
