@@ -1,34 +1,111 @@
 # NetPulse
 
-NetPulse is a mobile app for monitoring network quality and collecting user feedback, integrated with Supabase for backend services, and includes an ISP dashboard for data insights.
+A comprehensive solution to monitor and enhance network Quality of Experience (QoE) for Internet Service Providers (ISPs) in Cameroon by providing to network users, a simple way to report view the state of their network and report issues to their internet service providers. This project includes two main components:
 
-## Project Scope
-- **Mobile App**:
-  - Authentication: Register (email, password, phone number, confirmation code), login, logout (with confirmation dialog).
-  - Features: Monitor network metrics (signal strength, latency, packet loss), submit feedback (rating, comment, frequency), track data usage, customize settings (notifications, background data, location, language, theme, data deletion), receive push notifications.
-  - Offline Support: Cache data locally using Hive and sync with Supabase.
-  - Security: Use `encrypt` for data encryption, `flutter_secure_storage` for credentials, and Supabase row-level security.
-- **Backend**:
-  - Supabase for authentication, data storage (PostgreSQL), and real-time notifications (WebSocket).
-  - Database Schema: `Users`, `NetworkMetrics`, `Feedback`, `ISPs`.
-- **ISP Dashboard**:
-  - React-based single-page app.
-  - Features: ISP login, display metrics and feedback (filtered by ISPID), show phone numbers for insights, CSV export.
-- **Version Control**: GitHub repositories for mobile app and ISP dashboard.
+- **QoE Mobile App**: A Flutter-based mobile app for users to submit real-time network performance data and feedback.
+- **ISP Dashboard**: A React-based web interface for administrators to visualize network metrics and user feedback.
 
-## Tech Stack
-- **Mobile App**: Flutter (Dart), BLoC architecture, Fluent UI, plugins (`get`, `hive`, `supabase_flutter`, `network_info_plus`, `dart_ping`, `flutter_rating_bar`, `location`, `flutter_bloc`, `equatable`, `workmanager`, `encrypt`, `flutter_secure_storage`, `data_usage`).
-- **Backend**: Supabase (PostgreSQL, Auth, WebSocket).
-- **Local Storage**: Hive.
-- **ISP Dashboard**: React (CDN-based), Tailwind CSS.
-- **Tools**: GitHub, VS Code, Nowa, GitHub Actions, FlutterFlow.
+The system uses [Supabase](https://supabase.com) for secure authentication, real-time data syncing, and robust database management.
 
-## Development Phases
-1. Project Planning and Setup
-2. Mobile App Initial Structure
-3. Supabase and Database Setup
-4. Authentication Flow Setup
-5. Core App Functionality Structure
-6. Functionality Integration
-7. Advanced Features
-8. ISP Dashboard Development
+## Table of Contents
+
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [Screenshots](#screenshots)
+
+## Features
+
+### QoE Mobile App
+- User registration/login with email and password.
+- Real-time submission of network metrics (throughput, signal strength, latency).
+- Feedback submission with ratings and comments.
+- GPS-based location data collection.
+- Intuitive and user-friendly interface
+
+### ISP Dashboard
+- Real-time visualization of network metrics (latency, packet loss, throughput, signal strength).
+- Regional performance analysis with human-readable location mapping.
+- User feedback management with ratings and comments.
+- CSV export for metrics and feedback data.
+- Secure authentication with role-based access.
+
+
+### Shared Backend
+- Supabase-powered backend with PostgreSQL database.
+- Row Level Security (RLS) for data privacy and ISP-specific access.
+- Real-time updates via Supabase subscriptions.
+
+
+## Prerequisites
+- **Node.js** (v18.x or later) for the ISP Dashboard.
+- **Flutter SDK** (v3.x or later) for the QoE Mobile App.
+- **Git** for version control.
+- **npm** or **yarn** for dashboard dependencies.
+- **Mobile Development Dependencies** for mobile app development (emulators or physical devices).
+- A **Supabase account** with a project created.
+
+## Installation
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/kurocifer/NetPulse.git
+   cd NetPulse
+   ```
+
+2. **Set Up the Backend (Supabase)**
+
+3. **Set Up NetPulse Mobile App**
+   ```bash
+   cd mobile
+   flutter pub get
+   flutter run
+   ```
+   Ensure an emulator or physical device is configured.
+
+4. **Set Up the ISP Dashboard**
+   - backend
+      ```bash
+      cd backend
+      npm install
+      npm run dev
+      ```
+   
+   - dashboard
+      ```bash
+      cd dashboard
+      npm install
+      npm run dev
+      ```
+
+
+## Usage
+
+### NetPulse App
+- Launch on a device or emulator.
+- Register or log in with user credentials.
+- Allow Phone access for ISP detection and location (optional) access to submit network metrics.
+- Submit feedback with ratings and comments.
+- View real-time metric updates.
+
+### ISP Dashboard
+- Access at `http://localhost:3000`.
+- Log in with admin credentials.
+- Navigate tabs: Overview, Regional, Feedback, Alerts, Change Password.
+- Downlaod metrics or feedback using the "Download as CSV" button.
+
+
+## Configuration
+- Create a `.env` file in both `dashboard/` and `mobile/`:
+  ```
+  SUPABASE_URL=your-supabase-url
+  SUPABASE_ANON_KEY=your-supabase-anon-key
+  ```
+
+## Contributing
+If any issue found please infor us by submitting an issue or if you have any ehancement then help with a pull request :)
+
+## Screenshots
