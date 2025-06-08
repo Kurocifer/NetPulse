@@ -28,14 +28,33 @@ class HomeScreen extends StatelessWidget {
   IconData _getNetworkBarIcon(double quality, String networkType) {
     if (networkType == 'Offline' || quality == 0) {
       return Icons.signal_cellular_off_rounded;
-    } else if (quality > 0 && quality <= 300) {
+    } else if (quality > 0 && quality <= 500) {
       return Icons.signal_cellular_alt_1_bar_rounded;
-    } else if (quality > 300 && quality <= 1000) {
+    } else if (quality > 500 && quality <= 2000) {
       return Icons.signal_cellular_alt_2_bar_rounded;
     } else {
       return Icons.signal_cellular_alt_rounded;
     }
   }
+
+  double _getNiceInterval(double min, double max, int desiredCount) {
+    if (min == max) return 1.0; // Handle flat line
+    final range = max - min;
+    final roughInterval = range / (desiredCount - 1);
+
+    final List<double> niceIntervals = [
+      1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500,
+      1000, 2000, 2500, 5000, 10000, 20000, 25000, 50000, 100000
+    ];
+
+    for (var interval in niceIntervals) {
+      if (interval >= roughInterval) {
+        return interval;
+      }
+    }
+    return roughInterval.ceilToDouble();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -92,31 +111,54 @@ class HomeScreen extends StatelessWidget {
                     IconData networkIcon = Icons.signal_cellular_alt_rounded;
 
                     return FutureBuilder<List<Map<String, dynamic>>>(
-                      future: context.read<NetworkService>().getLoggedNetworkStates(),
+                      future: context
+                          .read<NetworkService>()
+                          .getLoggedNetworkStates(),
                       builder: (context, snapshot) {
                         double currentQuality = 0;
                         String currentNetworkType = state.networkType;
 
                         if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                           final latestState = snapshot.data!.last;
-                          currentQuality = (latestState['quality'] as num? ?? 0).toDouble();
-                          currentNetworkType = latestState['networkType'] as String;
+                          currentQuality = (latestState['quality'] as num? ?? 0)
+                              .toDouble();
+                          currentNetworkType =
+                              latestState['networkType'] as String;
 
                           if (currentQuality == 0) {
                             statusText = 'Offline';
-                            message = 'No active connection. Check your internet.';
+                            message =
+                                'No active connection. Check your internet.';
                             statusColor = statusRed;
-                          } else if (currentQuality > 0 && currentQuality <= 300) {
+                          } else if (currentQuality > 0 &&
+                              currentQuality <= 500) {
+                            statusText = 'Very Poor';
+                            message = 'Connection is too slow for most tasks.';
+                            statusColor = statusRed;
+                          } else if (currentQuality > 500 &&
+                              currentQuality <= 2000) {
                             statusText = 'Poor Connection';
-                            message = 'Low throughput. Signal may be weak.';
+                            message =
+                                'Limited throughput. Expect slow loading.';
                             statusColor = statusOrange;
-                          } else if (currentQuality > 300 && currentQuality <= 1000) {
+                          } else if (currentQuality > 2000 &&
+                              currentQuality <= 10000) {
                             statusText = 'Average Connection';
-                            message = 'Moderate throughput. Room for improvement.';
+                            message =
+                                'Suitable for basic Browse and SD streaming.';
                             statusColor = colorScheme.primary;
+                          } else if (currentQuality > 10000 &&
+                              currentQuality <= 25000) {
+                            statusText = 'Good Connection';
+                            message =
+                                'Solid performance for HD streaming and general use.';
+                            statusColor = statusGreen.withOpacity(
+                              0.7,
+                            );
                           } else {
                             statusText = 'Excellent Connection';
-                            message = 'Your network is performing perfectly.';
+                            message =
+                                'Your network is performing perfectly for high-bandwidth tasks.';
                             statusColor = statusGreen;
                           }
                         } else {
@@ -127,11 +169,16 @@ class HomeScreen extends StatelessWidget {
                           } else {
                             statusText = 'Gathering Data';
                             message = 'Initializing network monitoring...';
-                            statusColor = colorScheme.onBackground.withOpacity(0.5);
+                            statusColor = colorScheme.onBackground.withOpacity(
+                              0.5,
+                            );
                           }
                         }
 
-                        networkIcon = _getNetworkBarIcon(currentQuality, currentNetworkType);
+                        networkIcon = _getNetworkBarIcon(
+                          currentQuality,
+                          currentNetworkType,
+                        );
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +208,9 @@ class HomeScreen extends StatelessWidget {
                               message,
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
-                                color: colorScheme.onBackground.withOpacity(0.7),
+                                color: colorScheme.onBackground.withOpacity(
+                                  0.7,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -191,7 +240,9 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 FutureBuilder<List<Map<String, dynamic>>>(
-                  future: context.read<NetworkService>().getLoggedNetworkStates(),
+                  future: context
+                      .read<NetworkService>()
+                      .getLoggedNetworkStates(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return Column(
@@ -218,10 +269,33 @@ class HomeScreen extends StatelessWidget {
                     final loggedStates = snapshot.data!;
                     List<FlSpot> spots = [];
                     List<DateTime> timestamps = [];
+                    if (loggedStates.isEmpty) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.show_chart_rounded,
+                            size: 60,
+                            color: colorScheme.onBackground.withOpacity(0.4),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No historical data available yet.\nStart monitoring to see trends.',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: colorScheme.onBackground.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
 
                     for (int i = 0; i < loggedStates.length; i++) {
                       final state = loggedStates[i];
-                      final quality = (state['quality'] as num? ?? 0).toDouble();
+                      final quality = (state['quality'] as num? ?? 0)
+                          .toDouble();
                       spots.add(FlSpot(i.toDouble(), quality));
                       final timestampStr = state['timestamp'] as String?;
                       DateTime timestamp;
@@ -243,20 +317,40 @@ class HomeScreen extends StatelessWidget {
                         ? timestamps.reduce((a, b) => a.isAfter(b) ? a : b)
                         : DateTime.now();
 
-                    final minQuality = spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
-                    final maxQuality = spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
-                    final yRange = maxQuality - minQuality;
+                    double minQuality = spots.map((spot) => spot.y).reduce(min);
+                    double maxQuality = spots.map((spot) => spot.y).reduce(max);
 
-                    const desiredLabelCount = 5;
-                    final rawInterval = yRange / (desiredLabelCount - 1);
-                    final yInterval = max(rawInterval, 50.0);
+                    if (minQuality < 0) minQuality = 0;
+                    if (maxQuality == minQuality) maxQuality = minQuality + 1.0;
 
-                    final roundedMinQuality = (minQuality - 50).floorToDouble();
-                    final roundedMaxQuality = (maxQuality + 50).ceilToDouble();
+                    const desiredYLabelCount = 5;
+                    final yInterval = _getNiceInterval(minQuality, maxQuality, desiredYLabelCount);
 
-                    double bottomInterval = (spots.length > 1)
-                        ? (spots.length - 1) / 4
-                        : 1.0;
+                    double calculatedMinY = (minQuality / yInterval).floor() * yInterval;
+                    if (calculatedMinY < 0) calculatedMinY = 0;
+
+                    double calculatedMaxY = (maxQuality / yInterval).ceil() * yInterval;
+                    if (calculatedMaxY <= calculatedMinY) calculatedMaxY = calculatedMinY + yInterval;
+
+                    if (calculatedMaxY - calculatedMinY < yInterval) {
+                       if (calculatedMinY == 0 && calculatedMaxY == 0) {
+                          calculatedMaxY = yInterval * (desiredYLabelCount - 1);
+                          if (calculatedMaxY == 0) calculatedMaxY = 1000.0;
+                       } else if (calculatedMinY == calculatedMaxY) {
+                           calculatedMaxY += yInterval;
+                       }
+                    }
+
+                    final int numberOfDataPoints = spots.length;
+                    const int desiredXLabelCount = 4;
+
+                    double bottomInterval;
+                    if (numberOfDataPoints <= 1) {
+                      bottomInterval = 1.0;
+                    } else {
+                      bottomInterval = (numberOfDataPoints - 1) / (desiredXLabelCount - 1).clamp(1, desiredXLabelCount);
+                      if (bottomInterval < 1.0) bottomInterval = 1.0;
+                    }
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,7 +359,7 @@ class HomeScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Latest: ${formatThroughput(maxQuality)}',
+                              'Latest: ${formatThroughput(spots.isNotEmpty ? spots.last.y : 0.0)}', 
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -276,7 +370,9 @@ class HomeScreen extends StatelessWidget {
                               '${formatTime(earliestTime)} - ${formatTime(latestTime)}',
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
-                                color: colorScheme.onBackground.withOpacity(0.7),
+                                color: colorScheme.onBackground.withOpacity(
+                                  0.7,
+                                ),
                               ),
                             ),
                           ],
@@ -291,7 +387,9 @@ class HomeScreen extends StatelessWidget {
                                 drawVerticalLine: false,
                                 horizontalInterval: yInterval,
                                 getDrawingHorizontalLine: (value) => FlLine(
-                                  color: colorScheme.onBackground.withOpacity(0.1),
+                                  color: colorScheme.onBackground.withOpacity(
+                                    0.1,
+                                  ),
                                   strokeWidth: 0.5,
                                 ),
                               ),
@@ -300,14 +398,18 @@ class HomeScreen extends StatelessWidget {
                                   sideTitles: SideTitles(
                                     showTitles: true,
                                     reservedSize: 30,
-                                    interval: bottomInterval,
+                                    interval: bottomInterval, 
                                     getTitlesWidget: (value, meta) {
-                                      if (spots.length <= 1) {
+                                      if (spots.isEmpty) { 
                                         return SideTitleWidget(
                                           axisSide: AxisSide.bottom,
                                           child: Text(
-                                            'N/A',
-                                            style: GoogleFonts.poppins(fontSize: 10, color: colorScheme.onBackground.withOpacity(0.7)),
+                                            '',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 10,
+                                              color: colorScheme.onBackground
+                                                  .withOpacity(0.7),
+                                            ),
                                           ),
                                         );
                                       }
@@ -316,7 +418,11 @@ class HomeScreen extends StatelessWidget {
                                         axisSide: meta.axisSide,
                                         child: Text(
                                           formatTime(timestamps[index]),
-                                          style: GoogleFonts.poppins(fontSize: 10, color: colorScheme.onBackground.withOpacity(0.7)),
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 10,
+                                            color: colorScheme.onBackground
+                                                .withOpacity(0.7),
+                                          ),
                                           textAlign: TextAlign.center,
                                         ),
                                       );
@@ -333,21 +439,31 @@ class HomeScreen extends StatelessWidget {
                                         axisSide: meta.axisSide,
                                         child: Text(
                                           formatThroughput(value),
-                                          style: GoogleFonts.poppins(fontSize: 10, color: colorScheme.onBackground.withOpacity(0.7)),
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 10,
+                                            color: colorScheme.onBackground
+                                                .withOpacity(0.7),
+                                          ),
                                           textAlign: TextAlign.right,
                                         ),
                                       );
                                     },
                                   ),
                                 ),
-                                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                topTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                rightTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
                               ),
                               borderData: FlBorderData(show: false),
                               minX: 0,
-                              maxX: (spots.length > 0) ? (spots.length - 1).toDouble() : 0,
-                              minY: roundedMinQuality < 0 ? 0 : roundedMinQuality,
-                              maxY: roundedMaxQuality,
+                              maxX: (spots.length > 0)
+                                  ? (spots.length - 1).toDouble()
+                                  : 0,
+                              minY: calculatedMinY,
+                              maxY: calculatedMaxY,
                               lineBarsData: [
                                 LineChartBarData(
                                   spots: spots,
@@ -396,12 +512,16 @@ class HomeScreen extends StatelessWidget {
                         label: 'Refresh Status',
                         icon: Icons.refresh_rounded,
                         onPressed: () {
-                          context.read<NetworkBloc>().add(NetworkStatusRequested());
+                          context.read<NetworkBloc>().add(
+                            NetworkStatusRequested(),
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
                                 'Refreshing network status...',
-                                style: GoogleFonts.poppins(color: colorScheme.onPrimary),
+                                style: GoogleFonts.poppins(
+                                  color: colorScheme.onPrimary,
+                                ),
                               ),
                               backgroundColor: secondaryColor,
                               behavior: SnackBarBehavior.floating,
@@ -435,30 +555,50 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 FutureBuilder<List<Map<String, dynamic>>>(
-                  future: context.read<NetworkService>().getLoggedNetworkStates(),
+                  future: context
+                      .read<NetworkService>()
+                      .getLoggedNetworkStates(),
                   builder: (context, snapshot) {
-                    String tipMessage = 'No network data available. Ensure the app has permissions to monitor your network.';
+                    String tipMessage =
+                        'No network data available. Ensure the app has permissions to monitor your network.';
                     IconData tipIcon = Icons.info_outline_rounded;
-                    Color tipIconColor = colorScheme.onBackground.withOpacity(0.7);
+                    Color tipIconColor = colorScheme.onBackground.withOpacity(
+                      0.7,
+                    );
 
                     if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                       final latestState = snapshot.data!.last;
-                      final quality = (latestState['quality'] as num? ?? 0).toDouble();
+                      final quality = (latestState['quality'] as num? ?? 0)
+                          .toDouble();
 
                       if (quality == 0) {
-                        tipMessage = 'Your device is currently offline. Check your Wi-Fi or mobile data settings.';
+                        tipMessage =
+                            'Your device is currently offline. Check your Wi-Fi or mobile data settings.';
                         tipIcon = Icons.signal_wifi_off_rounded;
                         tipIconColor = statusRed;
-                      } else if (quality <= 300) {
-                        tipMessage = 'Experiencing poor signal? Try moving to a better location for improved throughput.';
+                      } else if (quality <= 500) {
+                        tipMessage =
+                            'Experiencing very poor signal? Try moving to a better location or checking provider coverage.';
                         tipIcon = Icons.lightbulb_outline_rounded;
+                        tipIconColor = statusRed;
+                      } else if (quality <= 2000) {
+                        tipMessage =
+                            'Your connection is limited. Consider closing background apps for a smoother experience.';
+                        tipIcon = Icons.info_outline_rounded;
                         tipIconColor = statusOrange;
-                      } else if (quality <= 1000) {
-                        tipMessage = 'Your connection is average. Consider closing background apps for a smoother experience.';
+                      } else if (quality <= 10000) {
+                        tipMessage =
+                            'Your connection is average. Optimize by ensuring no large downloads are running.';
                         tipIcon = Icons.tune_rounded;
                         tipIconColor = colorScheme.primary;
+                      } else if (quality <= 25000) {
+                        tipMessage =
+                            'Good connection! Enjoy reliable HD streaming and general use.';
+                        tipIcon = Icons.check_circle_outline_rounded;
+                        tipIconColor = statusGreen.withOpacity(0.7);
                       } else {
-                        tipMessage = 'Excellent network! You\'re all set for high-speed Browse and streaming.';
+                        tipMessage =
+                            'Excellent network! You\'re all set for high-speed Browse and streaming.';
                         tipIcon = Icons.check_circle_outline_rounded;
                         tipIconColor = statusGreen;
                       }
@@ -490,52 +630,4 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-
-  // Widget _buildActionButton({
-  //   required BuildContext context,
-  //   required String label,
-  //   required IconData icon,
-  //   required VoidCallback? onPressed,
-  //   LinearGradient? buttonGradient,
-  //   required Color textColor,
-  // }) {
-  //   return Container(
-  //     decoration: BoxDecoration(
-  //       gradient: buttonGradient,
-  //       borderRadius: BorderRadius.circular(12),
-  //     ),
-  //     child: ElevatedButton(
-  //       onPressed: onPressed,
-  //       style: ElevatedButton.styleFrom(
-  //         backgroundColor: Colors.transparent,
-  //         foregroundColor: textColor,
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(12),
-  //         ),
-  //         padding: EdgeInsets.zero,
-  //         elevation: 0,
-  //         shadowColor: Colors.transparent,
-  //       ),
-  //       child: Padding(
-  //         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-  //         child: Row(
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           children: [
-  //             Icon(icon, size: 28),
-  //             const SizedBox(width: 8),
-  //             Expanded(
-  //               child: Text(
-  //                 label,
-  //                 textAlign: TextAlign.center,
-  //                 overflow: TextOverflow.ellipsis,
-  //                 maxLines: 1,
-  //                 style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 }
