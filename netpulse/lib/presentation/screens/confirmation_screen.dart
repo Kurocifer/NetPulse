@@ -31,14 +31,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: isDarkMode
-                    ? [
-                        const Color(0xFF0F0F1A),
-                        primaryColor,
-                      ]
-                    : [
-                        colorScheme.surface,
-                        primaryColor.withOpacity(0.8),
-                      ],
+                    ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+                    : [colorScheme.background, secondaryColor.withOpacity(0.3)],
               ),
             ),
           ),
@@ -51,7 +45,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                 ),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    minHeight: MediaQuery.of(context).size.height -
+                    minHeight:
+                        MediaQuery.of(context).size.height -
                         MediaQuery.of(context).padding.top -
                         MediaQuery.of(context).padding.bottom -
                         MediaQuery.of(context).viewInsets.bottom,
@@ -92,11 +87,68 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                                   color: secondaryColor,
                                 ),
                               )
-                            : ElevatedButton(
+                            // : ElevatedButton(
+                            //     onPressed: () async {
+                            //       setState(() => _isResending = true);
+                            //       try {
+                            //         await supabase.auth.resend(type: OtpType.signup);
+                            //         ScaffoldMessenger.of(context).showSnackBar(
+                            //           SnackBar(
+                            //             content: Text(
+                            //               'Verification email resent',
+                            //               style: GoogleFonts.poppins(
+                            //                 color: Colors.white,
+                            //               ),
+                            //             ),
+                            //             backgroundColor: secondaryColor,
+                            //             behavior: SnackBarBehavior.floating,
+                            //             shape: RoundedRectangleBorder(
+                            //               borderRadius: BorderRadius.circular(10),
+                            //             ),
+                            //             margin: const EdgeInsets.all(16),
+                            //           ),
+                            //         );
+                            //       } catch (e) {
+                            //         ScaffoldMessenger.of(context).showSnackBar(
+                            //           SnackBar(
+                            //             content: Text(
+                            //               'Failed to resend email: $e',
+                            //               style: GoogleFonts.poppins(
+                            //                 color: Colors.white,
+                            //               ),
+                            //             ),
+                            //             backgroundColor: Colors.redAccent,
+                            //             behavior: SnackBarBehavior.floating,
+                            //             shape: RoundedRectangleBorder(
+                            //               borderRadius: BorderRadius.circular(10),
+                            //             ),
+                            //             margin: const EdgeInsets.all(16),
+                            //           ),
+                            //         );
+                            //       } finally {
+                            //         setState(() => _isResending = false);
+                            //       }
+                            //     },
+                            //     style: ElevatedButton.styleFrom(
+                            //       minimumSize: const Size(double.infinity, 50),
+                            //     ),
+                            //     child: Text(
+                            //       'Resend Email',
+                            //       style: GoogleFonts.poppins(
+                            //         fontSize: 18,
+                            //         fontWeight: FontWeight.bold,
+                            //       ),
+                            //     ),
+                            //   ),
+                            : _buildActionButton(
+                                context: context,
+                                label: 'Resend Email',
                                 onPressed: () async {
                                   setState(() => _isResending = true);
                                   try {
-                                    await supabase.auth.resend(type: OtpType.signup);
+                                    await supabase.auth.resend(
+                                      type: OtpType.signup,
+                                    );
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
@@ -108,7 +160,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                                         backgroundColor: secondaryColor,
                                         behavior: SnackBarBehavior.floating,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                         margin: const EdgeInsets.all(16),
                                       ),
@@ -119,13 +173,15 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                                         content: Text(
                                           'Failed to resend email: $e',
                                           style: GoogleFonts.poppins(
-                                            color: Colors.white,
+                                            color: colorScheme.onPrimary,
                                           ),
                                         ),
-                                        backgroundColor: Colors.redAccent,
+                                        backgroundColor: colorScheme.error,
                                         behavior: SnackBarBehavior.floating,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                         margin: const EdgeInsets.all(16),
                                       ),
@@ -134,30 +190,37 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                                     setState(() => _isResending = false);
                                   }
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: const Size(double.infinity, 50),
+                                buttonGradient: LinearGradient(
+                                  colors: [primaryColor, secondaryColor],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
                                 ),
-                                child: Text(
-                                  'Resend Email',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                textColor: colorScheme.onPrimary,
                               ),
                         const SizedBox(height: 16),
-                        ElevatedButton(
+                        // ElevatedButton(
+                        //   onPressed: () => Get.offAllNamed('/login'),
+                        //   style: ElevatedButton.styleFrom(
+                        //     minimumSize: const Size(double.infinity, 50),
+                        //   ),
+                        //   child: Text(
+                        //     'Go to Login',
+                        //     style: GoogleFonts.poppins(
+                        //       fontSize: 18,
+                        //       fontWeight: FontWeight.bold,
+                        //     ),
+                        //   ),
+                        // ),
+                        _buildActionButton(
+                          context: context,
+                          label: 'Go to Login',
                           onPressed: () => Get.offAllNamed('/login'),
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 50),
+                          buttonGradient: LinearGradient(
+                            colors: [primaryColor, secondaryColor],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
                           ),
-                          child: Text(
-                            'Go to Login',
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          textColor: colorScheme.onPrimary,
                         ),
                       ],
                     ),
@@ -167,6 +230,55 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required String label,
+    required VoidCallback? onPressed,
+    LinearGradient? buttonGradient,
+    required Color textColor,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: buttonGradient,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          foregroundColor: textColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.zero,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

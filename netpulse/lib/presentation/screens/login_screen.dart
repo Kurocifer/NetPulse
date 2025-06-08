@@ -7,6 +7,7 @@ import '../blocs/auth_event.dart';
 import '../blocs/auth_state.dart';
 import 'create_account_screen.dart';
 import 'package:netpulse/main.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -39,14 +40,18 @@ class _LoginScreenState extends State<LoginScreen> {
             Get.offAllNamed('/home');
           } else if (state is NetpulseAuthFailure) {
             String errorMessage;
-            if (state.message.toLowerCase().contains('invalid') || state.message.toLowerCase().contains('credential')) {
+            if (state.message.toLowerCase().contains('invalid') ||
+                state.message.toLowerCase().contains('credential')) {
               errorMessage = 'Invalid email or password. Please try again.';
-            } else if (state.message.toLowerCase().contains('network') || state.message.toLowerCase().contains('connection')) {
-              errorMessage = 'Unable to connect. Please check your internet connection and try again.';
+            } else if (state.message.toLowerCase().contains('network') ||
+                state.message.toLowerCase().contains('connection')) {
+              errorMessage =
+                  'Unable to connect. Please check your internet connection and try again.';
             } else if (state.message.toLowerCase().contains('timeout')) {
               errorMessage = 'Connection timed out. Please try again later.';
             } else {
-              errorMessage = 'An unexpected error occurred. Please try again later.';
+              errorMessage =
+                  'An unexpected error occurred. Please try again later.';
             }
             showDialog(
               context: context,
@@ -102,14 +107,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: isDarkMode
-                      ? [const Color(0xFF0F0F1A), primaryColor]
-                      : [colorScheme.surface, primaryColor.withOpacity(0.8)],
+                      ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+                      : [
+                          colorScheme.background,
+                          secondaryColor.withOpacity(0.3),
+                        ],
                 ),
               ),
             ),
             SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 48.0,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -139,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                        Text(
+                      Text(
                         'Time to rate the Network',
                         style: GoogleFonts.poppins(
                           fontSize: 20,
@@ -154,7 +165,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          prefixIcon: Icon(Icons.email_rounded, color: colorScheme.secondary),
+                          prefixIcon: Icon(
+                            Icons.email_rounded,
+                            color: colorScheme.secondary,
+                          ),
                           hintText: 'Enter your email',
                         ),
                         validator: (value) {
@@ -173,14 +187,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: Icon(Icons.lock_rounded, color: colorScheme.secondary),
+                          prefixIcon: Icon(
+                            Icons.lock_rounded,
+                            color: colorScheme.secondary,
+                          ),
                           hintText: 'Enter your password',
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                              _obscurePassword
+                                  ? Icons.visibility_off_rounded
+                                  : Icons.visibility_rounded,
                               color: colorScheme.secondary,
                             ),
-                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                           ),
                         ),
                         validator: (value) {
@@ -199,7 +220,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: TextButton(
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Forgot Password feature coming soon')),
+                              const SnackBar(
+                                content: Text(
+                                  'Forgot Password feature coming soon',
+                                ),
+                              ),
                             );
                           },
                           child: Text(
@@ -212,29 +237,50 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      ElevatedButton(
+                      // ElevatedButton(
+                      //   onPressed: () {
+                      //     if (_formKey.currentState!.validate()) {
+                      //       context.read<AuthBloc>().add(AuthLoginRequested(
+                      //             _emailController.text,
+                      //             _passwordController.text,
+                      //           ));
+                      //     }
+                      //   },
+                      //   style: ElevatedButton.styleFrom(
+                      //     minimumSize: const Size(double.infinity, 50),
+                      //   ),
+                      //   child: Text(
+                      //     'Log In',
+                      //     style: GoogleFonts.poppins(
+                      //       fontSize: 18,
+                      //       fontWeight: FontWeight.bold,
+                      //     ),
+                      //   ),
+                      // ),
+                      _buildActionButton(
+                        context: context,
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            context.read<AuthBloc>().add(AuthLoginRequested(
-                                  _emailController.text,
-                                  _passwordController.text,
-                                ));
+                            context.read<AuthBloc>().add(
+                              AuthLoginRequested(
+                                _emailController.text,
+                                _passwordController.text,
+                              ),
+                            );
                           }
                         },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
+                        label: 'Log In',
+                        buttonGradient: LinearGradient(
+                          colors: [primaryColor, secondaryColor],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                        child: Text(
-                          'Log In',
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        textColor: colorScheme.onPrimary,
                       ),
                       const SizedBox(height: 20),
                       TextButton(
-                        onPressed: () => Get.to(() => const CreateAccountScreen()),
+                        onPressed: () =>
+                            Get.to(() => const CreateAccountScreen()),
                         child: Text(
                           "Don't have an account? Sign up",
                           style: GoogleFonts.poppins(
@@ -249,6 +295,55 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required String label,
+    required VoidCallback? onPressed,
+    LinearGradient? buttonGradient,
+    required Color textColor,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: buttonGradient,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          foregroundColor: textColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.zero,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

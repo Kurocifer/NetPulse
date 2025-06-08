@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:netpulse/presentation/widgets/action_button.dart';
 import '../blocs/network_bloc.dart';
 import '../../data/services/network_service.dart';
 import 'package:netpulse/main.dart';
@@ -390,7 +391,7 @@ class HomeScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: _buildActionButton(
+                      child: BuildActionButton(
                         context: context,
                         label: 'Refresh Status',
                         icon: Icons.refresh_rounded,
@@ -417,6 +418,7 @@ class HomeScreen extends StatelessWidget {
                           end: Alignment.centerRight,
                         ),
                         textColor: colorScheme.onPrimary,
+                        fontSize: 18,
                       ),
                     ),
                   ],

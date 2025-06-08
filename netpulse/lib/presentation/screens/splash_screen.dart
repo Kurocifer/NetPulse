@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:netpulse/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:netpulse/presentation/screens/login_screen.dart';
 
@@ -100,6 +101,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Container(
@@ -107,10 +109,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              colorScheme.background,
-              colorScheme.primary.withOpacity(0.8),
-            ],
+            // colors: [
+            //   colorScheme.background,
+            //   colorScheme.primary.withOpacity(0.8),
+            // ],
+            colors: isDarkMode
+                ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+                : [colorScheme.background, secondaryColor.withOpacity(0.3)],
           ),
         ),
         child: Center(

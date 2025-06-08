@@ -109,8 +109,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: isDarkMode
-                      ? [const Color(0xFF0F0F1A), primaryColor]
-                      : [colorScheme.surface, primaryColor.withOpacity(0.8)],
+                ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+                : [colorScheme.background, secondaryColor.withOpacity(0.3)],
                 ),
               ),
             ),
@@ -244,8 +244,30 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         },
                       ),
                       const SizedBox(height: 30),
-                      ElevatedButton(
-                        onPressed: () {
+                      // ElevatedButton(
+                      //   onPressed: () {
+                      //     if (_formKey.currentState!.validate()) {
+                      //       context.read<AuthBloc>().add(AuthSignUpRequested(
+                      //             _emailController.text,
+                      //             _passwordController.text,
+                      //             _phoneController.text,
+                      //           ));
+                      //     }
+                      //   },
+                      //   style: ElevatedButton.styleFrom(
+                      //     minimumSize: const Size(double.infinity, 50), 
+                      //   ),
+                      //   child: Text(
+                      //     'Create Account',
+                      //     style: GoogleFonts.poppins(
+                      //       fontSize: 18,
+                      //       fontWeight: FontWeight.bold,
+                      //     ),
+                      //   ),
+                      // ),
+                      _buildActionButton(
+                        context: context,
+                          onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             context.read<AuthBloc>().add(AuthSignUpRequested(
                                   _emailController.text,
@@ -254,16 +276,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                 ));
                           }
                         },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50), 
+                        label: 'Create Account',
+                        buttonGradient: LinearGradient(
+                          colors: [primaryColor, secondaryColor],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                        child: Text(
-                          'Create Account',
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        textColor: colorScheme.onPrimary,
                       ),
                       const SizedBox(height: 20),
                       TextButton(
@@ -286,4 +305,53 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       ),
     );
   }
+
+    Widget _buildActionButton({
+    required BuildContext context,
+    required String label,
+    required VoidCallback? onPressed,
+    LinearGradient? buttonGradient,
+    required Color textColor,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: buttonGradient,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          foregroundColor: textColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.zero,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }  
 }
