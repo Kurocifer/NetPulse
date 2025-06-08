@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:netpulse/presentation/blocs/auth_bloc.dart';
 import 'package:netpulse/presentation/blocs/auth_event.dart';
 import 'package:netpulse/presentation/blocs/auth_state.dart';
+import 'package:netpulse/presentation/widgets/action_button.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sim_card_info/sim_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -304,53 +305,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Widget _buildActionButton({
-    required BuildContext context,
-    required String label,
-    required IconData icon,
-    required VoidCallback? onPressed,
-    LinearGradient? buttonGradient,
-    required Color textColor,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: buttonGradient, 
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: textColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: EdgeInsets.zero,
-          elevation: 0,
-          shadowColor: Colors.transparent,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 28),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildActionButton({
+  //   required BuildContext context,
+  //   required String label,
+  //   required IconData icon,
+  //   required VoidCallback? onPressed,
+  //   LinearGradient? buttonGradient,
+  //   required Color textColor,
+  // }) {
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //       gradient: buttonGradient, 
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: ElevatedButton(
+  //       onPressed: onPressed,
+  //       style: ElevatedButton.styleFrom(
+  //         backgroundColor: Colors.transparent,
+  //         foregroundColor: textColor,
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //         ),
+  //         padding: EdgeInsets.zero,
+  //         elevation: 0,
+  //         shadowColor: Colors.transparent,
+  //       ),
+  //       child: Padding(
+  //         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+  //         child: Row(
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [
+  //             Icon(icon, size: 28),
+  //             const SizedBox(width: 8),
+  //             Expanded(
+  //               child: Text(
+  //                 label,
+  //                 textAlign: TextAlign.center,
+  //                 overflow: TextOverflow.ellipsis,
+  //                 maxLines: 1,
+  //                 style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -639,7 +640,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 0), 
                   child: SizedBox(
                     width: double.infinity,
-                    child: _buildActionButton(
+                    child: BuildActionButton(
                       context: context,
                       label: 'Log Out',
                       icon: Icons.logout_rounded,

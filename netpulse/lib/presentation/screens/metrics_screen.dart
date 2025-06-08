@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:netpulse/presentation/widgets/action_button.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/services/network_service.dart';
 import '../../data/services/location_service.dart';
@@ -367,53 +368,53 @@ class _MetricsScreenState extends State<MetricsScreen> {
   }
 
   // Helper to build gradient action button
-  Widget _buildActionButton({
-    required BuildContext context,
-    required String label,
-    required IconData icon,
-    required VoidCallback? onPressed,
-    LinearGradient? buttonGradient,
-    required Color textColor,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: buttonGradient,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: textColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: EdgeInsets.zero,
-          elevation: 0,
-          shadowColor: Colors.transparent,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 28),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildActionButton({
+  //   required BuildContext context,
+  //   required String label,
+  //   required IconData icon,
+  //   required VoidCallback? onPressed,
+  //   LinearGradient? buttonGradient,
+  //   required Color textColor,
+  // }) {
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //       gradient: buttonGradient,
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: ElevatedButton(
+  //       onPressed: onPressed,
+  //       style: ElevatedButton.styleFrom(
+  //         backgroundColor: Colors.transparent,
+  //         foregroundColor: textColor,
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //         ),
+  //         padding: EdgeInsets.zero,
+  //         elevation: 0,
+  //         shadowColor: Colors.transparent,
+  //       ),
+  //       child: Padding(
+  //         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+  //         child: Row(
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [
+  //             Icon(icon, size: 28),
+  //             const SizedBox(width: 8),
+  //             Expanded(
+  //               child: Text(
+  //                 label,
+  //                 textAlign: TextAlign.center,
+  //                 overflow: TextOverflow.ellipsis,
+  //                 maxLines: 1,
+  //                 style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -469,9 +470,9 @@ class _MetricsScreenState extends State<MetricsScreen> {
                           isError: true,
                         ),
                         const SizedBox(height: 30),
-                        _buildActionButton( // Use the styled button
+                        BuildActionButton(
                           context: context,
-                          label: 'Submit Latest Metrics',
+                          label: 'Submit Network Metrics',
                           icon: Icons.send_rounded,
                           onPressed: _isSubmitting ? null : _submitMetrics,
                           buttonGradient: LinearGradient(
@@ -480,6 +481,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
                             end: Alignment.centerRight,
                           ),
                           textColor: colorScheme.onPrimary,
+                          fontSize: 18,
                         ),
                       ],
                     ),
@@ -584,7 +586,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
                       ),
                       const SizedBox(height: 30),
 
-                      _buildActionButton(
+                      BuildActionButton(
                         context: context,
                         label: 'Submit Network Metrics',
                         icon: Icons.send_rounded,

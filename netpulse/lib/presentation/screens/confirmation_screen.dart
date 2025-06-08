@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:netpulse/presentation/widgets/action_button.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:netpulse/main.dart';
 
@@ -140,7 +141,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                             //       ),
                             //     ),
                             //   ),
-                            : _buildActionButton(
+                            : BuildActionButton(
                                 context: context,
                                 label: 'Resend Email',
                                 onPressed: () async {
@@ -211,7 +212,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                         //     ),
                         //   ),
                         // ),
-                        _buildActionButton(
+                        BuildActionButton(
                           context: context,
                           label: 'Go to Login',
                           onPressed: () => Get.offAllNamed('/login'),
@@ -234,52 +235,52 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     );
   }
 
-  Widget _buildActionButton({
-    required BuildContext context,
-    required String label,
-    required VoidCallback? onPressed,
-    LinearGradient? buttonGradient,
-    required Color textColor,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: buttonGradient,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: textColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: EdgeInsets.zero,
-          elevation: 0,
-          shadowColor: Colors.transparent,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildActionButton({
+  //   required BuildContext context,
+  //   required String label,
+  //   required VoidCallback? onPressed,
+  //   LinearGradient? buttonGradient,
+  //   required Color textColor,
+  // }) {
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //       gradient: buttonGradient,
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: ElevatedButton(
+  //       onPressed: onPressed,
+  //       style: ElevatedButton.styleFrom(
+  //         backgroundColor: Colors.transparent,
+  //         foregroundColor: textColor,
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //         ),
+  //         padding: EdgeInsets.zero,
+  //         elevation: 0,
+  //         shadowColor: Colors.transparent,
+  //       ),
+  //       child: Padding(
+  //         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+  //         child: Row(
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [
+  //             const SizedBox(width: 8),
+  //             Expanded(
+  //               child: Text(
+  //                 label,
+  //                 textAlign: TextAlign.center,
+  //                 overflow: TextOverflow.ellipsis,
+  //                 maxLines: 1,
+  //                 style: GoogleFonts.poppins(
+  //                   fontSize: 18,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }
