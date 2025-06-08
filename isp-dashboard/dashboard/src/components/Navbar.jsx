@@ -86,7 +86,7 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">ISP Dashboard</div>
+      <div className="navbar-brand">NetPulse ISP Dashboard</div>
       <div className="navbar-links">
         <Link to="/overview" className={getLinkClass('/overview')}>Overview</Link>
         <Link to="/regional" className={getLinkClass('/regional')}>Regional</Link>

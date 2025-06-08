@@ -109,3 +109,20 @@ The system uses [Supabase](https://supabase.com) for secure authentication, real
 If any issue found please infor us by submitting an issue or if you have any ehancement then help with a pull request :)
 
 ## Screenshots
+
+- NetPulse Moble App
+
+![splash screen](shots/splash.jpg)
+![login](shots/login.jpg)
+![signup](shots/signup.jpg)
+![home](shots/home.jpg)
+![metrics](shots/metrics.jpg)
+![feedback](shots/feedback.jpg)
+![settings](shots/settings.jpg)
+
+- NetPulse ISP Dashboard
+![login](shots/login.png)
+![overview](shots/overview.png)
+![overview](shots/overview2.png)
+![regional](shots/regional.png)
+![feedback](shots/feedback.png)
