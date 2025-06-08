@@ -126,8 +126,9 @@ class NetworkService {
     }
 
     try {
-      const testFileUrl =
-          'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png';
+      // const testFileUrl =
+      //     'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png';
+      const testFileUrl = 'https://speed.cloudflare.com/__down?bytes=5000000';
       final stopwatch = Stopwatch()..start();
       final response = await http.get(Uri.parse(testFileUrl));
       stopwatch.stop();
