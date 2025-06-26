@@ -67,15 +67,15 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDarkMode
-                ? [colorScheme.background, primaryColor.withOpacity(0.7)]
-                : [colorScheme.background, secondaryColor.withOpacity(0.3)],
-          ),
-        ),
+        // decoration: BoxDecoration(
+        //   gradient: LinearGradient(
+        //     begin: Alignment.topLeft,
+        //     end: Alignment.bottomRight,
+        //     colors: isDarkMode
+        //         ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+        //         : [colorScheme.background, secondaryColor.withOpacity(0.3)],
+        //   ),
+        // ),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(

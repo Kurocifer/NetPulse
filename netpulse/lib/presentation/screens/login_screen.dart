@@ -103,18 +103,18 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Stack(
           children: [
             Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isDarkMode
-                      ? [colorScheme.background, primaryColor.withOpacity(0.7)]
-                      : [
-                          colorScheme.background,
-                          secondaryColor.withOpacity(0.3),
-                        ],
-                ),
-              ),
+              // decoration: BoxDecoration(
+              //   gradient: LinearGradient(
+              //     begin: Alignment.topLeft,
+              //     end: Alignment.bottomRight,
+              //     colors: isDarkMode
+              //         ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+              //         : [
+              //             colorScheme.background,
+              //             secondaryColor.withOpacity(0.3),
+              //           ],
+              //   ),
+              // ),
             ),
             SafeArea(
               child: SingleChildScrollView(
@@ -138,7 +138,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: GoogleFonts.poppins(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimary,
+                          color: colorScheme.secondary,
+
+                          // color: colorScheme.onPrimary,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -147,7 +149,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Welcome back!',
                         style: GoogleFonts.poppins(
                           fontSize: 20,
-                          color: colorScheme.onPrimary.withOpacity(0.8),
+                          color: colorScheme.secondary,
+
+                          // color: colorScheme.onPrimary.withOpacity(0.8),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -155,7 +159,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Time to rate the Network',
                         style: GoogleFonts.poppins(
                           fontSize: 20,
-                          color: colorScheme.onPrimary.withOpacity(0.8),
+                          color: colorScheme.secondary,
+
+                          // color: colorScheme.onPrimary.withOpacity(0.8),
                         ),
                         textAlign: TextAlign.center,
                       ),

@@ -18,6 +18,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   int _rating = 0;
   final TextEditingController _commentController = TextEditingController();
   bool _isSubmitting = false;
+  bool _isSubmitPressed = false;
+  bool _isClearPressed = false;
 
   final List<String> _ispPrefixes = ['MTN', 'ORANGE', 'CAMTEL'];
 
@@ -39,22 +41,33 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     if (_rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please select a rating.', style: GoogleFonts.poppins(color: Colors.white)),
+          content: Text(
+            'Please select a rating.',
+            style: GoogleFonts.poppins(color: Colors.white),
+          ),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           margin: const EdgeInsets.all(16),
         ),
       );
       return;
     }
-    if (_commentController.text.isNotEmpty && _commentController.text.trim().length < 10) {
+    if (_commentController.text.isNotEmpty &&
+        _commentController.text.trim().length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Comment must be at least 10 characters if provided.', style: GoogleFonts.poppins(color: Colors.white)),
+          content: Text(
+            'Comment must be at least 10 characters if provided.',
+            style: GoogleFonts.poppins(color: Colors.white),
+          ),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           margin: const EdgeInsets.all(16),
         ),
       );
@@ -63,6 +76,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
     setState(() {
       _isSubmitting = true;
+      _isSubmitPressed = true;
     });
 
     try {
@@ -79,12 +93,16 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           .select('UserID')
           .ilike('Email', queryEmail)
           .limit(1);
-      print('Users table query response: $response');
+      developer.log('Users table query response: $response');
 
       if (response.isEmpty) {
-        final allUsers = await Supabase.instance.client.from('Users').select('email');
+        final allUsers = await Supabase.instance.client
+            .from('Users')
+            .select('email');
         developer.log('All emails in Users table: $allUsers');
-        throw Exception('User not found in Users table with email: "$queryEmail"');
+        throw Exception(
+          'User not found in Users table with email: "$queryEmail"',
+        );
       }
       final userIdFromUsersTable = response.first['UserID'] as String;
 
@@ -110,10 +128,15 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Thank you for your feedback!', style: GoogleFonts.poppins(color: Colors.white)),
+          content: Text(
+            'Thank you for your feedback!',
+            style: GoogleFonts.poppins(color: Colors.white),
+          ),
           backgroundColor: secondaryColor,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           margin: const EdgeInsets.all(16),
         ),
       );
@@ -123,26 +146,56 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         _commentController.clear();
       });
     } catch (e) {
+      String errorMessage = 'Error submitting feedback. Please try again.';
+      if (e is PostgrestException) {
+        if (e.message.contains('Failed to fetch') ||
+            e.message.contains('Network error')) {
+          errorMessage = 'No internet connection. Please check your network.';
+        } else if (e.code == 'PGRST301' || e.message.contains('timeout')) {
+          errorMessage = 'Connection timed out. Please check your network.';
+        } else if (e.message.contains('not found')) {
+          errorMessage = 'User not found. Please ensure you are logged in.';
+        }
+      } else if (e.toString().contains('No network state available')) {
+        errorMessage =
+            'No network data available. Please monitor your network first.';
+      } else if (e.toString().contains('User not authenticated')) {
+        errorMessage = 'Please log in to submit feedback.';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error submitting feedback: $e', style: GoogleFonts.poppins(color: Colors.white)),
+          content: Text(
+            errorMessage,
+            style: GoogleFonts.poppins(color: Colors.white),
+          ),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           margin: const EdgeInsets.all(16),
         ),
       );
     } finally {
       setState(() {
         _isSubmitting = false;
+        _isSubmitPressed = false;
       });
     }
   }
 
   void _clearForm() {
     setState(() {
+      _isClearPressed = true;
       _rating = 0;
       _commentController.clear();
+    });
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        setState(() {
+          _isClearPressed = false;
+        });
+      }
     });
   }
 
@@ -152,75 +205,26 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     super.dispose();
   }
 
-  // Widget _buildActionButton({
-  //   required BuildContext context,
-  //   required String label,
-  //   required IconData icon,
-  //   required VoidCallback? onPressed,
-  //   LinearGradient? buttonGradient,
-  //   required Color textColor,
-  // }) {
-  //   return Container(
-  //     decoration: BoxDecoration(
-  //       gradient: buttonGradient,
-  //       borderRadius: BorderRadius.circular(12),
-  //     ),
-  //     child: ElevatedButton(
-  //       onPressed: onPressed,
-  //       style: ElevatedButton.styleFrom(
-  //         backgroundColor: Colors.transparent,
-  //         foregroundColor: textColor,
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(12),
-  //         ),
-  //         padding: EdgeInsets.zero,
-  //         elevation: 0,
-  //         shadowColor: Colors.transparent,
-  //       ),
-  //       child: Padding(
-  //         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-  //         child: Row(
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           children: [
-  //             Icon(icon, size: 28),
-  //             const SizedBox(width: 8),
-  //             Expanded(
-  //               child: Text(
-  //                 label,
-  //                 textAlign: TextAlign.center,
-  //                 overflow: TextOverflow.ellipsis,
-  //                 maxLines: 1,
-  //                 style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
+    // Helper to lighten a color
+    Color lightenColor(Color color, [double amount = 0.2]) {
+      final hsl = HSLColor.fromColor(color);
+      return hsl
+          .withLightness((hsl.lightness + amount).clamp(0.0, 1.0))
+          .toColor();
+    }
+
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDarkMode
-                ? [colorScheme.background, primaryColor.withOpacity(0.7)]
-                : [colorScheme.background, secondaryColor.withOpacity(0.3)],
-          ),
-        ),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch, 
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Align(
                   alignment: Alignment.center,
@@ -276,8 +280,12 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                         });
                       },
                       child: Icon(
-                        _rating >= starIndex ? Icons.star_rounded : Icons.star_border_rounded,
-                        color: _rating >= starIndex ? Colors.amber[600] : colorScheme.onBackground.withOpacity(0.4),
+                        _rating >= starIndex
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        color: _rating >= starIndex
+                            ? Colors.amber[600]
+                            : colorScheme.onBackground.withOpacity(0.4),
                         size: 48,
                       ),
                     );
@@ -301,7 +309,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                   maxLength: 500,
                   decoration: InputDecoration(
                     hintText: 'Tell us about your experience...',
-                    hintStyle: GoogleFonts.poppins(color: colorScheme.onSurface.withOpacity(0.5)),
+                    hintStyle: GoogleFonts.poppins(
+                      color: colorScheme.onSurface.withOpacity(0.5),
+                    ),
                     filled: true,
                     fillColor: colorScheme.surface,
                     border: OutlineInputBorder(
@@ -310,7 +320,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
+                      borderSide: BorderSide(
+                        color: colorScheme.outline.withOpacity(0.3),
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -318,38 +330,88 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     ),
                     contentPadding: const EdgeInsets.all(16.0),
                   ),
-                  style: GoogleFonts.poppins(
-                    color: colorScheme.onSurface,
-                  ),
+                  style: GoogleFonts.poppins(color: colorScheme.onSurface),
                   cursorColor: secondaryColor,
                 ),
                 const SizedBox(height: 30),
 
-                BuildActionButton(
-                  context: context,
-                  label: 'Submit Feedback',
-                  icon: Icons.send_rounded,
-                  onPressed: _isSubmitting ? null : _submitFeedback,
-                  buttonGradient: LinearGradient(
-                    colors: [primaryColor, secondaryColor],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+                AnimatedScale(
+                  scale: _isSubmitPressed ? 0.9 : 1.0,
+                  duration: const Duration(milliseconds: 100),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      BuildActionButton(
+                        context: context,
+                        label: _isSubmitting ? '' : 'Submit Feedback',
+                        icon: _isSubmitting ? null : Icons.send_rounded,
+                        onPressed: _isSubmitting
+                            ? null
+                            : () async {
+                                setState(() {
+                                  _isSubmitPressed = true;
+                                });
+                                await _submitFeedback();
+                                Future.delayed(
+                                  const Duration(milliseconds: 200),
+                                  () {
+                                    if (mounted) {
+                                      setState(() {
+                                        _isSubmitPressed = false;
+                                      });
+                                    }
+                                  },
+                                );
+                              },
+                        buttonGradient: LinearGradient(
+                          colors: _isSubmitPressed || _isSubmitting
+                              ? [
+                                  primaryColor.withOpacity(0.8),
+                                  lightenColor(secondaryColor, 0.3),
+                                ]
+                              : [primaryColor, secondaryColor],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        textColor: colorScheme.onPrimary,
+                      ),
+                      if (_isSubmitting)
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            colorScheme.onPrimary,
+                          ),
+                          strokeWidth: 2,
+                        ),
+                    ],
                   ),
-                  textColor: colorScheme.onPrimary,
                 ),
                 const SizedBox(height: 16),
-                OutlinedButton(
-                  onPressed: _clearForm,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: secondaryColor, width: 1.5),
-                    foregroundColor: secondaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                AnimatedScale(
+                  scale: _isClearPressed ? 0.9 : 1.0,
+                  duration: const Duration(milliseconds: 100),
+                  child: OutlinedButton(
+                    onPressed: _clearForm,
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: _isClearPressed
+                            ? lightenColor(secondaryColor, 0.3)
+                            : secondaryColor,
+                        width: 1.5,
+                      ),
+                      foregroundColor: _isClearPressed
+                          ? lightenColor(secondaryColor, 0.3)
+                          : secondaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    textStyle: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
+                    child: const Text('Clear Form'),
                   ),
-                  child: const Text('Clear Form'),
                 ),
               ],
             ),

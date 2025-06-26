@@ -7,8 +7,7 @@ import '../blocs/auth_bloc.dart';
 import '../blocs/auth_event.dart';
 import '../blocs/auth_state.dart';
 
-
-import 'package:netpulse/main.dart'; 
+import 'package:netpulse/main.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -47,14 +46,20 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             Get.offNamed('/confirmation');
           } else if (state is NetpulseAuthFailure) {
             String errorMessage;
-            if (state.message.toLowerCase().contains('invalid') || state.message.toLowerCase().contains('email') || state.message.toLowerCase().contains('exists')) {
-              errorMessage = 'This email is already in use or invalid. Please try a different email.';
-            } else if (state.message.toLowerCase().contains('network') || state.message.toLowerCase().contains('connection')) {
-              errorMessage = 'Unable to connect. Please check your internet connection and try again.';
+            if (state.message.toLowerCase().contains('invalid') ||
+                state.message.toLowerCase().contains('email') ||
+                state.message.toLowerCase().contains('exists')) {
+              errorMessage =
+                  'This email is already in use or invalid. Please try a different email.';
+            } else if (state.message.toLowerCase().contains('network') ||
+                state.message.toLowerCase().contains('connection')) {
+              errorMessage =
+                  'Unable to connect. Please check your internet connection and try again.';
             } else if (state.message.toLowerCase().contains('timeout')) {
               errorMessage = 'Connection timed out. Please try again later.';
             } else {
-              errorMessage = 'An unexpected error occurred. Please try again later.';
+              errorMessage =
+                  'An unexpected error occurred. Please try again later.';
             }
             showDialog(
               context: context,
@@ -105,20 +110,23 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         child: Stack(
           children: [
             Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isDarkMode
-                ? [colorScheme.background, primaryColor.withOpacity(0.7)]
-                : [colorScheme.background, secondaryColor.withOpacity(0.3)],
-                ),
-              ),
+              // decoration: BoxDecoration(
+              //   gradient: LinearGradient(
+              //     begin: Alignment.topLeft,
+              //     end: Alignment.bottomRight,
+              //     colors: isDarkMode
+              //   ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+              //   : [colorScheme.background, secondaryColor.withOpacity(0.3)],
+              //   ),
+              // ),
             ),
             // Content
             SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 48.0,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -135,7 +143,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         style: GoogleFonts.poppins(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimary,
+                          color: colorScheme.secondary,
+
+                          // color: colorScheme.onPrimary,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -144,7 +154,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         'Tap in',
                         style: GoogleFonts.poppins(
                           fontSize: 20,
-                          color: colorScheme.onPrimary.withOpacity(0.8),
+                          color: colorScheme.secondary,
+
+                          // color: colorScheme.onPrimary.withOpacity(0.8),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -152,7 +164,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         'Your Voice, Your Network',
                         style: GoogleFonts.poppins(
                           fontSize: 20,
-                          color: colorScheme.onPrimary.withOpacity(0.8),
+                          color: colorScheme.secondary,
+
+                          // color: colorScheme.onPrimary.withOpacity(0.8),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -163,7 +177,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          prefixIcon: Icon(Icons.email_rounded, color: colorScheme.secondary),
+                          prefixIcon: Icon(
+                            Icons.email_rounded,
+                            color: colorScheme.secondary,
+                          ),
                           hintText: 'Enter your email',
                         ),
                         validator: (value) {
@@ -182,11 +199,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
                           labelText: 'Phone number',
-                          prefixIcon: Icon(Icons.phone_rounded, color: colorScheme.secondary),
+                          prefixIcon: Icon(
+                            Icons.phone_rounded,
+                            color: colorScheme.secondary,
+                          ),
                           hintText: 'e.g., +1234567890',
                         ),
                         validator: (value) {
-                          if (value != null && value.isNotEmpty && (!value.startsWith('+') || value.length < 10)) {
+                          if (value != null &&
+                              value.isNotEmpty &&
+                              (!value.startsWith('+') || value.length < 10)) {
                             return 'Enter a valid phone number (e.g., +1234567890)';
                           }
                           return null;
@@ -198,14 +220,21 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: Icon(Icons.lock_rounded, color: colorScheme.secondary),
+                          prefixIcon: Icon(
+                            Icons.lock_rounded,
+                            color: colorScheme.secondary,
+                          ),
                           hintText: 'Enter your password',
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                              _obscurePassword
+                                  ? Icons.visibility_off_rounded
+                                  : Icons.visibility_rounded,
                               color: colorScheme.secondary,
                             ),
-                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                           ),
                         ),
                         validator: (value) {
@@ -224,14 +253,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         obscureText: _obscureConfirmPassword,
                         decoration: InputDecoration(
                           labelText: 'Confirm password',
-                          prefixIcon: Icon(Icons.lock_reset_rounded, color: colorScheme.secondary),
+                          prefixIcon: Icon(
+                            Icons.lock_reset_rounded,
+                            color: colorScheme.secondary,
+                          ),
                           hintText: 'Confirm your password',
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureConfirmPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_off_rounded
+                                  : Icons.visibility_rounded,
                               color: colorScheme.secondary,
                             ),
-                            onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                            onPressed: () => setState(
+                              () => _obscureConfirmPassword =
+                                  !_obscureConfirmPassword,
+                            ),
                           ),
                         ),
                         validator: (value) {
@@ -256,7 +293,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       //     }
                       //   },
                       //   style: ElevatedButton.styleFrom(
-                      //     minimumSize: const Size(double.infinity, 50), 
+                      //     minimumSize: const Size(double.infinity, 50),
                       //   ),
                       //   child: Text(
                       //     'Create Account',
@@ -268,13 +305,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       // ),
                       BuildActionButton(
                         context: context,
-                          onPressed: () {
+                        onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            context.read<AuthBloc>().add(AuthSignUpRequested(
-                                  _emailController.text,
-                                  _passwordController.text,
-                                  _phoneController.text,
-                                ));
+                            context.read<AuthBloc>().add(
+                              AuthSignUpRequested(
+                                _emailController.text,
+                                _passwordController.text,
+                                _phoneController.text,
+                              ),
+                            );
                           }
                         },
                         label: 'Create Account',
@@ -354,5 +393,5 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   //       ),
   //     ),
   //   );
-  // }  
+  // }
 }

@@ -25,7 +25,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = false;
   bool _backgroundDataEnabled = false;
-  bool _locationTrackingEnabled = false;
+  bool _locationTrackingEnabled = true;
   bool _phoneAccessEnabled = true;
   String _selectedLanguage = 'English';
   String _selectedTheme = 'System';
@@ -360,15 +360,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDarkMode
-                ? [colorScheme.background, primaryColor.withOpacity(0.7)]
-                : [colorScheme.background, secondaryColor.withOpacity(0.3)],
-          ),
-        ),
+        // decoration: BoxDecoration(
+        //   gradient: LinearGradient(
+        //     begin: Alignment.topLeft,
+        //     end: Alignment.bottomRight,
+        //     colors: isDarkMode
+        //         ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+        //         : [colorScheme.background, secondaryColor.withOpacity(0.3)],
+        //   ),
+        // ),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),

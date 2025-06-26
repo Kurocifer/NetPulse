@@ -15,13 +15,15 @@ class NetworkService {
   Timer? _simCheckTimer;
   Map<String, dynamic> _currentNetworkInfo = {
     'networkType': 'Offline',
-    'isp': 'Offline',
+    'isp': 'Searching...',
   };
   String? _lastCarrierName;
 
-  NetworkService({required PhoneService phoneService, LocationService? locationService})
-      : _phoneService = phoneService,
-        _locationService = locationService {
+  NetworkService({
+    required PhoneService phoneService,
+    LocationService? locationService,
+  }) : _phoneService = phoneService,
+       _locationService = locationService {
     _startListening();
     _startSimChangeDetection();
   }
@@ -40,26 +42,33 @@ class NetworkService {
     _simCheckTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       final simInfo = await _phoneService.getSimInfo();
       final currentCarrierName = simInfo?.carrierName ?? 'Unknown';
-      if (_lastCarrierName != null && _lastCarrierName != currentCarrierName) {
-        print('SIM change detected: $_lastCarrierName -> $currentCarrierName');
-        final connectivityResult = await _connectivity.checkConnectivity();
-        if (connectivityResult.isNotEmpty) {
-          await getNetworkInfoFromResult(connectivityResult.first);
-        }
+
+      print('SIM change detected: $_lastCarrierName -> $currentCarrierName');
+      final connectivityResult = await _connectivity.checkConnectivity();
+      if (connectivityResult.isNotEmpty) {
+        await getNetworkInfoFromResult(connectivityResult.first, carrierName: currentCarrierName);
       }
       _lastCarrierName = currentCarrierName;
     });
   }
 
-  Future<void> getNetworkInfoFromResult(ConnectivityResult result, {bool isBackground = false}) async {
+  Future<void> getNetworkInfoFromResult(
+    ConnectivityResult result, {
+    bool isBackground = false,
+    String carrierName = "Searching..."
+  }) async {
     Map<String, dynamic> networkInfo = {
       'networkType': 'Offline',
       'isp': 'Offline',
     };
 
-    final simInfo = await _phoneService.getSimInfo();
-    if (simInfo != null) {
-      networkInfo['isp'] = simInfo.carrierName;
+    if (carrierName == "Searching...") {
+      final simInfo = await _phoneService.getSimInfo();
+      if (simInfo != null) {
+        networkInfo['isp'] = simInfo.carrierName;
+      }
+    } else {
+      networkInfo['isp'] = carrierName;
     }
 
     if (result == ConnectivityResult.wifi) {
@@ -75,35 +84,42 @@ class NetworkService {
     await _logNetworkState(networkInfo, isBackground: isBackground);
   }
 
-  Future<void> _logNetworkState(Map<String, dynamic> networkInfo, {bool isBackground = false}) async {
+  Future<void> _logNetworkState(
+    Map<String, dynamic> networkInfo, {
+    bool isBackground = false,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> loggedStates = prefs.getStringList('network_states') ?? [];
     final now = DateTime.now();
     final timestampStr = now.toIso8601String();
     final quality = await _measureThroughput(networkInfo['networkType']);
     final metrics = await _measureNetworkMetrics(networkInfo['networkType']);
-    
+
     // Skip location fetch in background mode or if _locationService is null
-    final position = isBackground || _locationService == null ? null : await _locationService.getCurrentLocation();
+    final position = isBackground || _locationService == null
+        ? null
+        : await _locationService.getCurrentLocation();
     final latitude = position?.latitude;
     final longitude = position?.longitude;
 
-    final state = {
-      'timestamp': timestampStr,
-      'networkType': networkInfo['networkType'],
-      'isp': networkInfo['isp'],
-      'stateValue': _getStateValue(networkInfo['networkType']),
-      'quality': quality,
-      'latency': metrics['latency'],
-      'packetLoss': metrics['packetLoss'],
-      'latitude': latitude,
-      'longitude': longitude,
-    };
-    loggedStates.add(jsonEncode(state));
-    if (loggedStates.length > 144) {
-      loggedStates = loggedStates.sublist(loggedStates.length - 144);
+    if (networkInfo['networkType'] != 'Offline') {
+      final state = {
+        'timestamp': timestampStr,
+        'networkType': networkInfo['networkType'],
+        'isp': networkInfo['isp'],
+        'stateValue': _getStateValue(networkInfo['networkType']),
+        'quality': quality,
+        'latency': metrics['latency'],
+        'packetLoss': metrics['packetLoss'],
+        'latitude': latitude,
+        'longitude': longitude,
+      };
+      loggedStates.add(jsonEncode(state));
+      if (loggedStates.length > 144) {
+        loggedStates = loggedStates.sublist(loggedStates.length - 144);
+      }
+      await prefs.setStringList('network_states', loggedStates);
     }
-    await prefs.setStringList('network_states', loggedStates);
   }
 
   Future<Map<String, dynamic>> getNetworkInfo() async {

@@ -12,7 +12,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -105,19 +106,19 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            // colors: [
-            //   colorScheme.background,
-            //   colorScheme.primary.withOpacity(0.8),
-            // ],
-            colors: isDarkMode
-                ? [colorScheme.background, primaryColor.withOpacity(0.7)]
-                : [colorScheme.background, secondaryColor.withOpacity(0.3)],
-          ),
-        ),
+        // decoration: BoxDecoration(
+        //   gradient: LinearGradient(
+        //     begin: Alignment.topLeft,
+        //     end: Alignment.bottomRight,
+        //     // colors: [
+        //     //   colorScheme.background,
+        //     //   colorScheme.primary.withOpacity(0.8),
+        //     // ],
+        //     colors: isDarkMode
+        //         ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+        //         : [colorScheme.background, secondaryColor.withOpacity(0.3)],
+        //   ),
+        // ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -142,9 +143,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   child: Text(
                     'NetPulse',
                     style: GoogleFonts.poppins(
-                      fontSize: 56,
+                      fontSize: 36,
                       fontWeight: FontWeight.w900,
-                      color: colorScheme.onPrimary,
+                      color: colorScheme.secondary,
+
+                      // color: colorScheme.onPrimary,
                       letterSpacing: 2,
                     ),
                   ),
@@ -160,7 +163,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.w300,
-                      color: colorScheme.onPrimary.withOpacity(0.8),
+                      color: colorScheme.secondary,
+
+                      // color: colorScheme.onPrimary.withOpacity(0.8),
                     ),
                     textAlign: TextAlign.center,
                   ),

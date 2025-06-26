@@ -15,8 +15,10 @@ import 'presentation/blocs/auth_bloc.dart';
 import 'presentation/blocs/network_bloc.dart';
 import 'routes.dart';
 
-const Color primaryColor = Color.fromARGB(255, 15, 52, 170); // Dark Blue: #051650
-const Color secondaryColor = Color.fromARGB(255, 57, 99, 228); // Medium Blue: #123499
+// const Color primaryColor = Color.fromARGB(255, 15, 52, 170); // Dark Blue: #051650
+// const Color secondaryColor = Color.fromARGB(255, 57, 99, 228); // Medium Blue: #123499
+const Color primaryColor = Color.fromARGB(255, 45, 86, 221); // Dark Blue: #051650
+const Color secondaryColor = Color.fromARGB(255, 71, 110, 226);
 
 
 const String backgroundTaskKey = "com.example.netpulse.networkMonitoringTask";

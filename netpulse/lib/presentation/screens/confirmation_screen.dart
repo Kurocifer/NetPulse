@@ -27,15 +27,15 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDarkMode
-                    ? [colorScheme.background, primaryColor.withOpacity(0.7)]
-                    : [colorScheme.background, secondaryColor.withOpacity(0.3)],
-              ),
-            ),
+            // decoration: BoxDecoration(
+            //   gradient: LinearGradient(
+            //     begin: Alignment.topLeft,
+            //     end: Alignment.bottomRight,
+            //     colors: isDarkMode
+            //         ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+            //         : [colorScheme.background, secondaryColor.withOpacity(0.3)],
+            //   ),
+            // ),
           ),
           SafeArea(
             child: SingleChildScrollView(
@@ -69,7 +69,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
-                            color: colorScheme.onPrimary,
+                            // color: colorScheme.secondary,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -78,7 +78,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                           textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
                             fontSize: 16,
-                            color: colorScheme.onPrimary.withOpacity(0.8),
+                            // color: colorScheme.secondary,
                           ),
                         ),
                         const SizedBox(height: 40),
@@ -174,7 +174,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                                         content: Text(
                                           'Failed to resend email: $e',
                                           style: GoogleFonts.poppins(
-                                            color: colorScheme.onPrimary,
+                                            color: colorScheme.secondary,
                                           ),
                                         ),
                                         backgroundColor: colorScheme.error,

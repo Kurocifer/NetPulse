@@ -35,13 +35,13 @@ class _MainScreenState extends State<MainScreen> {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
 
-    final LinearGradient commonAppBarAndNavBarGradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: isDarkMode
-          ? [colorScheme.surface, primaryColor.withOpacity(0.5)]
-          : [colorScheme.surface, secondaryColor.withOpacity(0.05)],
-    );
+    // final LinearGradient commonAppBarAndNavBarGradient = LinearGradient(
+    //   begin: Alignment.topLeft,
+    //   end: Alignment.bottomRight,
+    //   colors: isDarkMode
+    //       ? [colorScheme.surface, primaryColor.withOpacity(0.5)]
+    //       : [colorScheme.surface, secondaryColor.withOpacity(0.05)],
+    // );
 
     return Scaffold(
       appBar: AppBar(
@@ -63,7 +63,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
-            gradient: commonAppBarAndNavBarGradient,
+            // gradient: commonAppBarAndNavBarGradient,
             borderRadius: const BorderRadius.vertical(
               bottom: Radius.circular(0),
             ),
@@ -71,28 +71,28 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDarkMode
-                ? [colorScheme.background, primaryColor.withOpacity(0.7)]
-                : [colorScheme.background, secondaryColor.withOpacity(0.3)],
-          ),
-        ),
+        // decoration: BoxDecoration(
+        //   gradient: LinearGradient(
+        //     begin: Alignment.topLeft,
+        //     end: Alignment.bottomRight,
+        //     colors: isDarkMode
+        //         ? [colorScheme.background, primaryColor.withOpacity(0.7)]
+        //         : [colorScheme.background, secondaryColor.withOpacity(0.3)],
+        //   ),
+        // ),
         child: _screens[_selectedIndex],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          gradient: commonAppBarAndNavBarGradient,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 0,
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
+          // gradient: commonAppBarAndNavBarGradient,
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: Colors.black.withOpacity(0.2),
+          //     spreadRadius: 0,
+          //     blurRadius: 10,
+          //     offset: const Offset(0, -2),
+          //   ),
+          // ],
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(0),
             topRight: Radius.circular(0),
