@@ -15,7 +15,7 @@ class NetworkService {
   Timer? _simCheckTimer;
   Map<String, dynamic> _currentNetworkInfo = {
     'networkType': 'Offline',
-    'isp': 'Searching...',
+    'isp': 'MTN CAM',
   };
   String? _lastCarrierName;
 

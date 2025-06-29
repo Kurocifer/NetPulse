@@ -336,7 +336,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
   Widget _buildFilterOptions(ColorScheme colorScheme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: ['All', 'Wi-Fi', 'Mobile', 'Offline'].map((filter) {
+      children: ['All', 'Wi-Fi', 'Mobile'].map((filter) {
         final isSelected = _selectedFilter == filter;
         return ChoiceChip(
           label: Text(filter),

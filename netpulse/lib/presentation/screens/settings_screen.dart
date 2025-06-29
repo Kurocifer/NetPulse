@@ -295,7 +295,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (authState is NetpulseAuthFailure) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error logging out: ${authState.message}', style: GoogleFonts.poppins(color: Colors.white)),
+          content: Text('Error logging out, try again', style: GoogleFonts.poppins(color: Colors.white)),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
