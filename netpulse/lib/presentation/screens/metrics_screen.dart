@@ -499,7 +499,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    // final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Helper to lighten a color
     Color lightenColor(Color color, [double amount = 0.2]) {

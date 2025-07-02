@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:netpulse/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:netpulse/presentation/screens/login_screen.dart';
 
@@ -102,7 +101,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    // final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Container(

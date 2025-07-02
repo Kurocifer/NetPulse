@@ -31,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    // final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
 

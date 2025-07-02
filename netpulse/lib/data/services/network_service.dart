@@ -39,7 +39,7 @@ class NetworkService {
   }
 
   void _startSimChangeDetection() {
-    _simCheckTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+    _simCheckTimer = Timer.periodic(const Duration(seconds: 20), (timer) async {
       final simInfo = await _phoneService.getSimInfo();
       final currentCarrierName = simInfo?.carrierName ?? 'Unknown';
 

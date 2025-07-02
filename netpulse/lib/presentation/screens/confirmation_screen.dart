@@ -21,7 +21,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     final email = supabase.auth.currentUser?.email ?? 'your email';
 
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    // final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Stack(

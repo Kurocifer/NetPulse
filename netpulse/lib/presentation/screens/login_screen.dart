@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    // final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: BlocListener<AuthBloc, NetpulseAuthState>(

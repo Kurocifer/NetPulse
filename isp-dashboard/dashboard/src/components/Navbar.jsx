@@ -86,12 +86,12 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">NetPulse ISP Dashboard</div>
+      <div className="navbar-brand">{sessionStorage.getItem('isp')} - NetPulse ISP Dashboard</div>
       <div className="navbar-links">
         <Link to="/overview" className={getLinkClass('/overview')}>Overview</Link>
         <Link to="/regional" className={getLinkClass('/regional')}>Regional</Link>
         <Link to="/feedback" className={getLinkClass('/feedback')}>Feedback</Link>
-        <Link to="/alerts" className={getLinkClass('/alerts')}>Alerts</Link>
+        {/* <Link to="/alerts" className={getLinkClass('/alerts')}>Alerts</Link> */}
         <Link to="/change-password" className={getLinkClass('/change-password')}>Change Password</Link>
         <div className="navbar-download">
           <button

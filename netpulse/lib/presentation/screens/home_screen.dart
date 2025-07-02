@@ -59,7 +59,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    // final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     const Color statusGreen = Color(0xFF4CAF50);
     const Color statusOrange = Color(0xFFFF9800);
